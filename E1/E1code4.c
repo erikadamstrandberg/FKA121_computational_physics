@@ -123,7 +123,8 @@ int main(){
     printf("Total number of time steps: %d\n", n_timesteps);
     int n_particles = 3;
 
-    double kappa = 1000e-24/(9649*AMU);
+    double kappa = 1000*1e-24/(9649*AMU);
+    printf("kappa = %f\n", kappa);
 
     double v1 = 0.0;
     double v2 = 0.0;
@@ -135,9 +136,9 @@ int main(){
     double q3[n_timesteps];
     q1[0] = 0.01;
 
-    double m1 = 12.0*AMU;
-    double m2 = 12.0*AMU;
-    double m3 = 12.0*AMU;
+    double m1 = 12.0/9649.0; //12.0*AMU;
+    double m2 = 12.0/9649.0; //12.0*AMU;
+    double m3 = 12.0/9649.0; //12.0*AMU;
     double m[] = {m1, m2, m3};
     
     double U_kin[n_timesteps];
