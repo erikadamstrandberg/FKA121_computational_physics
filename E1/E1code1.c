@@ -75,13 +75,26 @@ void write_to_file(char *fname, double *time_array,
 
 int main()
 {
-    int N = 250; double dt = 0.1;
-    double a = 1; double f = 2; double phi = 0;
+    int N = 255; double dt = 0.1;
+    double a = 1.0; double f = 2.0; double phi = 0.0;
     double time_array[N];
     arange(time_array, 0, N, dt);
     
     double signal[N];
     generate_signal(signal, time_array, N, a, f, phi);
+
+    /*
+     * add a second frequency to signal
+    
+    double f2 = 6.0;
+    double signal2[N];
+    generate_signal(signal2, time_array, N, a, f2, phi);
+    
+    for(int i = 0; i < N; i++){
+       signal[i] += signal2[i];
+    } 
+    */
+
     write_to_file("signal.csv", time_array, signal, N);
     return 0;
 }
