@@ -23,6 +23,16 @@
 
 #define AMU GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS
 
+void write_qs_file(double *q1, double *q2, double *q3, double *timesteps, int n_points)
+{
+    FILE *fp = fopen("displacement.csv", "w");
+    fprintf(fp, "q1,q2,q3,time\n");
+    for(int i = 0; i < n_points; ++i){
+	    fprintf(fp, "%f,%f,%f,%f\n", q1[i], q2[i], q3[i], timesteps[i]);
+    }
+    fclose(fp);
+}
+
 void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u)
 {
     /* Declaration of variables */
@@ -59,6 +69,11 @@ void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
     q[2] = q_3[0];
     calc_acc(a, q, m, kappa, n_particles);
     for (int i = 1; i < n_timesteps + 1; i++) {
+
+        if (i%100 == 0) {
+            printf("Working on timestep: %d\n", i);
+        }
+
         /* v(t+dt/2) */
         for (int j = 0; j < n_particles; j++) {
             v[j] += dt * 0.5 * a[j];
@@ -89,7 +104,7 @@ int main(){
     double total_time = 0.25;
     double dt = 0.0001;
     int n_timesteps = total_time/dt;
-    printf("number of time steps: %d\n", n_timesteps);
+    printf("Total number of time steps: %d\n", n_timesteps);
     int n_particles = 3;
 
     double kappa = 1000e-24/(9649*AMU);
@@ -111,5 +126,11 @@ int main(){
     
     velocity_verlet(n_timesteps, n_particles, v, q1, q2, q3, dt, m, kappa);
 
+    double timesteps[n_timesteps];
+    for (int i = 0; i < n_timesteps; i++) {
+        timesteps[i] = i*dt;
+    }
+
+    write_qs_file(q1, q2, q3, timesteps, n_timesteps);
     return 0;
 }
