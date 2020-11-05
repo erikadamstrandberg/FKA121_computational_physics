@@ -20,15 +20,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <gsl/gsl_const_mksa.h>
+#include <math.h>
 
 #define AMU GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS
 
-void write_qs_file(double *q1, double *q2, double *q3, double *timesteps, int n_points)
+void write_qs_file(double *q1, double *q2, double *q3, 
+                   double *U_kin, double *U_pot, 
+                   double *timesteps, int n_points)
 {
-    FILE *fp = fopen("displacement.csv", "w");
-    fprintf(fp, "q1,q2,q3,time\n");
+    FILE *fp = fopen("timetrail.csv", "w");
+    fprintf(fp, "q1,q2,q3,U_kin,U_pot,time\n");
     for(int i = 0; i < n_points; ++i){
-	    fprintf(fp, "%f,%f,%f,%f\n", q1[i], q2[i], q3[i], timesteps[i]);
+	    fprintf(fp, "%f,%f,%f,%f,%f,%f\n", q1[i], q2[i], q3[i], U_kin[i], U_pot[i], timesteps[i]);
     }
     fclose(fp);
 }
@@ -60,7 +63,8 @@ void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u)
  */
 void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
 		     double *q_2, double *q_3, double dt, double *m,
-		     double kappa)
+		     double kappa, 
+             double *U_kin, double *U_pot)
 {
     double q[n_particles];
     double a[n_particles];
@@ -92,6 +96,18 @@ void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
             v[j] += dt * 0.5 * a[j];
         }
         
+        /*U(t+dt) */
+        for (int j = 0; j < n_particles; j++) {
+            U_kin[i] += m[j]*v[j]*v[j]/2.0;
+
+            if(j == 0 || j == n_particles-1){
+                U_pot[i] += pow(q[j], 2)*kappa/2.0;
+            }
+            else{
+                U_pot[i] += pow(q[j+1]-q[j], 2)*kappa/2.0;
+            }
+        }
+
         /* Save the displacement of the three atoms */
         q_1[i] = q[0];
         q_2[i] = q[1];
@@ -124,13 +140,17 @@ int main(){
     double m3 = 12.0*AMU;
     double m[] = {m1, m2, m3};
     
-    velocity_verlet(n_timesteps, n_particles, v, q1, q2, q3, dt, m, kappa);
+    double U_kin[n_timesteps];
+    double U_pot[n_timesteps];
+    //U_pot[0] = kappa*pow(q1[0], 2);
+
+    velocity_verlet(n_timesteps, n_particles, v, q1, q2, q3, dt, m, kappa, U_kin, U_pot);
 
     double timesteps[n_timesteps];
     for (int i = 0; i < n_timesteps; i++) {
         timesteps[i] = i*dt;
     }
 
-    write_qs_file(q1, q2, q3, timesteps, n_timesteps);
+    write_qs_file(q1, q2, q3, U_kin, U_pot, timesteps, n_timesteps);
     return 0;
 }
