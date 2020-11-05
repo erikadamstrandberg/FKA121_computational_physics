@@ -42,8 +42,8 @@ void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u)
     int i;
     
     /* Calculating the acceleration on the boundaries */
-    a[0] = kappa*(- u[0] + u[1])/m[0];
-    a[size_of_u - 1] = kappa*(u[size_of_u - 2] - u[size_of_u - 1])/m[size_of_u - 1];
+    a[0] = kappa*(-2*u[0] + u[1])/m[0];
+    a[size_of_u - 1] = kappa*(u[size_of_u - 2] - 2*u[size_of_u - 1])/m[size_of_u - 1];
     
     /* Calculating the acceleration of the inner points */
     for (i = 1; i < size_of_u - 1; i++){
@@ -98,7 +98,7 @@ void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
         
         /*U(t+dt) */
         for (int j = 0; j < n_particles; j++) {
-            U_kin[i] += m[j]*v[j]*v[j]/2.0;
+            U_kin[i] += m[j]*pow(v[j], 2)/2.0;
 
             if(j == 0 || j == n_particles-1){
                 U_pot[i] += pow(q[j], 2)*kappa/2.0;
@@ -123,7 +123,7 @@ int main(){
     printf("Total number of time steps: %d\n", n_timesteps);
     int n_particles = 3;
 
-    double kappa = 1000*1e-24/(9649*AMU);
+    double kappa = 1000.0*1e-24/(9649.0*AMU);
     printf("kappa = %f\n", kappa);
 
     double v1 = 0.0;
@@ -134,7 +134,7 @@ int main(){
     double q1[n_timesteps];
     double q2[n_timesteps];
     double q3[n_timesteps];
-    q1[0] = 0.01;
+    q1[0] = 0.01, q2[0] = 0.0, q3[0] = 0.0;
 
     double m1 = 12.0/9649.0; //12.0*AMU;
     double m2 = 12.0/9649.0; //12.0*AMU;
