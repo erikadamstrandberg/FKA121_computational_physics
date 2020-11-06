@@ -1,4 +1,4 @@
-/******************************************************************************
+/*****************************************************************************
  * E1code4
  ******************************************************************************
  * Routine that runs the velocity verlet algorithm
@@ -96,19 +96,23 @@ void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
             v[j] += dt * 0.5 * a[j];
         }
         
-        /*U(t+dt) */
+        /*U_kin(t+dt) */
         for (int j = 0; j < n_particles; j++) {
+
             U_kin[i] += m[j]*pow(v[j], 2)/2.0;
 
-            /*if(j == 0 || j == n_particles-1){
-                U_pot[i] += pow(q[j], 2)*kappa/2.0;
-            }
-            else{
-                U_pot[i] += pow(q[j+1]-q[j], 2)*kappa/2.0;
-            }*/
         }
-        U_pot[i] = kappa*(pow(q[0],2)+pow(q[1]-q[0],2)+pow(q[2]-q[1],2)+pow(-q[2],2))/2.0;
 
+        /*U_pot(t+dt) */
+        for (int j = 0; j < n_particles+1; j++) {
+            if(j == 0) {
+                U_pot[i] += pow(q[j], 2)*kappa/2.0;
+            } else if(j == n_particles){
+                U_pot[i] += pow(q[j-1], 2)*kappa/2.0;
+            }else{
+                U_pot[i] += pow(q[j]-q[j-1], 2)*kappa/2.0;
+            }
+        }
         /* Save the displacement of the three atoms */
         q_1[i] = q[0];
         q_2[i] = q[1];
