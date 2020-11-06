@@ -22,12 +22,13 @@
 #include <gsl/gsl_const_mksa.h>
 #include <math.h>
 
+#include "fft.h"
+
 #define AMU GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS
 
 void write_qs_file(double *q1, double *q2, double *q3, 
                    double *U_kin, double *U_pot, 
-                   double *timesteps, int n_points)
-{
+                   double *timesteps, int n_points){
     FILE *fp = fopen("timetrail.csv", "w");
     fprintf(fp, "q1,q2,q3,U_kin,U_pot,time\n");
     for(int i = 0; i < n_points; ++i){
@@ -36,8 +37,24 @@ void write_qs_file(double *q1, double *q2, double *q3,
     fclose(fp);
 }
 
-void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u)
-{
+void write_powerspectrum_file(double *q1, double *q2, double *q3, 
+                              double *frequencies, int n_points){
+    FILE *fp = fopen("powerspectrum.csv", "w");
+    fprintf(fp, "q1,q2,q3,frequencies\n");
+    for(int i = 0; i < n_points; ++i){
+	    fprintf(fp, "%f,%f,%f,%f\n", q1[i], q2[i], q3[i], frequencies[i]);
+    }
+    fclose(fp);
+}
+
+void write_omega0(double *omega0){
+
+    FILE *fp = fopen("omega0.csv", "w");
+    fprintf(fp, "omega0\n");
+	    fprintf(fp, "%f\n", *omega0);
+    fclose(fp);
+}
+void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u){
     /* Declaration of variables */
     int i;
     
@@ -64,8 +81,7 @@ void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u)
 void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
 		     double *q_2, double *q_3, double dt, double *m,
 		     double kappa, 
-             double *U_kin, double *U_pot)
-{
+             double *U_kin, double *U_pot){
     double q[n_particles];
     double a[n_particles];
     q[0] = q_1[0];
@@ -122,8 +138,8 @@ void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
 
 int main(){
 
-    double total_time = 0.25;
-    double dt = 0.0001;
+    double total_time = 5;
+    double dt = 0.001;
     int n_timesteps = total_time/dt;
     printf("Total number of time steps: %d\n", n_timesteps);
     int n_particles = 3;
@@ -158,5 +174,28 @@ int main(){
     }
 
     write_qs_file(q1, q2, q3, U_kin, U_pot, timesteps, n_timesteps);
+
+    double fftd_q1[n_timesteps];
+    double fftd_q2[n_timesteps];
+    double fftd_q3[n_timesteps];
+    powerspectrum(q1, fftd_q1, n_timesteps); 
+    powerspectrum_shift(fftd_q1, n_timesteps);
+
+    powerspectrum(q2, fftd_q2, n_timesteps);
+    powerspectrum_shift(fftd_q2, n_timesteps);
+
+    powerspectrum(q3, fftd_q3, n_timesteps);
+    powerspectrum_shift(fftd_q3, n_timesteps);
+ 
+    double frequencies[n_timesteps];
+    for(int i = 0; i < n_timesteps; i++){
+	    frequencies[i] = i / (dt *n_timesteps);
+    }
+
+    fft_freq_shift(frequencies, dt, n_timesteps);
+    write_powerspectrum_file(fftd_q1, fftd_q2, fftd_q3, frequencies, n_timesteps);
+
+    double omega0 = sqrt(kappa/m[1]);
+    write_omega0(&omega0);
     return 0;
 }

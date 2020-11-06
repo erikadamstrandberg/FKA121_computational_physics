@@ -18,7 +18,6 @@ array = np.genfromtxt('timetrail.csv', delimiter=',', skip_header=1)
 # U_pot = array[:, 4]
 # time = array[:, 5]
 
-#%%
 fig, ax = plt.subplots()
 ax.plot(array[:, 5], array[:, 0])
 ax.plot(array[:, 5], array[:, 1])
