@@ -28,6 +28,15 @@ ax.set_ylabel('signal (arb.unit)')
 ax.grid()
 
 plt.show()
+plt.savefig('displacement.pdf', bbox_inches='tight')
+
+#%%
+
+fig, ax = plt.subplots()
+ax.plot(array[:, 5], array[:, 3])
+ax.plot(array[:, 5], array[:, 4])
+ax.plot(array[:, 5], array[:, 3] + array[:, 4])
+
 
 #%%
 

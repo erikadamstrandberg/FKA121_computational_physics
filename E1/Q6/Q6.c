@@ -114,20 +114,12 @@ void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
         
         /*U_kin(t+dt) */
         for (int j = 0; j < n_particles; j++) {
-
             U_kin[i] += m[j]*pow(v[j], 2)/2.0;
-
         }
 
         /*U_pot(t+dt) */
-        for (int j = 0; j < n_particles+1; j++) {
-            if(j == 0) {
-                U_pot[i] += pow(q[j], 2)*kappa/2.0;
-            } else if(j == n_particles){
-                U_pot[i] += pow(q[j-1], 2)*kappa/2.0;
-            }else{
-                U_pot[i] += pow(q[j]-q[j-1], 2)*kappa/2.0;
-            }
+        for (int j = 1; j < n_particles; j++) {
+            U_pot[i] += pow(q[j]-q[j-1], 2)*kappa/2.0;
         }
         /* Save the displacement of the three atoms */
         q_1[i] = q[0];
@@ -138,7 +130,7 @@ void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
 
 int main(){
 
-    double total_time = 2.0;
+    double total_time = 0.1;
     double dt = 0.0001;
     int n_timesteps = total_time/dt;
     printf("Total number of time steps: %d\n", n_timesteps);
@@ -163,7 +155,7 @@ int main(){
     
     double U_kin[n_timesteps];
     double U_pot[n_timesteps];
-    U_pot[0] = kappa*pow(q1[0], 2);
+    U_pot[0] = kappa*(pow(q2[0]-q1[0], 2)+pow(q3[0]-q2[0], 2))/2.0;
 
     velocity_verlet(n_timesteps, n_particles, v, q1, q2, q3, dt, m, kappa, U_kin, U_pot);
 
