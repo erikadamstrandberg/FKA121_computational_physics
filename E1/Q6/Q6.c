@@ -130,7 +130,7 @@ void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
 
 int main(){
 
-    double total_time = 0.1;
+    double total_time = 2.5;
     double dt = 0.0001;
     int n_timesteps = total_time/dt;
     printf("Total number of time steps: %d\n", n_timesteps);

@@ -27,7 +27,6 @@ ax.set_xlabel('time (arb.unit)')
 ax.set_ylabel('signal (arb.unit)')
 ax.grid()
 
-plt.show()
 plt.savefig('displacement.pdf', bbox_inches='tight')
 
 #%%
@@ -37,29 +36,43 @@ ax.plot(array[:, 5], array[:, 3])
 ax.plot(array[:, 5], array[:, 4])
 ax.plot(array[:, 5], array[:, 3] + array[:, 4])
 
+ax.set_xlabel('time (arb.unit)')
+ax.set_ylabel('power (arb.unit)')
+ax.grid()
+
+plt.savefig('energy.pdf', bbox_inches='tight')
+
 
 #%%
 
 array = np.genfromtxt('powerspectrum.csv', delimiter=',', skip_header=1)
 omega0 = np.genfromtxt('omega0.csv', delimiter=',', skip_header=1)
+omega = np.array([0,omega0[0],omega0[1]])
 
 power_spectrum = array[:, 0]+array[:, 1]+array[:, 2]
-scale = omega0/(2*np.pi)
 
-x_min = -100/scale
-x_max = 100/scale
+fig, ax = plt.subplots()
+ax.plot(array[:, 3], power_spectrum)
+
+ax.set_xlabel(r'freq [THz]')
+ax.set_ylabel(r'power spectrum [arb.u]')
+ax.grid()
+
+plt.savefig('powerspectrum_without_analytical.pdf', bbox_inches='tight')
+
+x_min = -100
+x_max = 100
 
 y_min = -0.01
 y_max = max(power_spectrum)
-
-fig, ax = plt.subplots()
-ax.plot(array[:, 3]/scale, power_spectrum)
-
-ax.set_xlabel(r'$\omega_0$')
-ax.set_ylabel(r'power spectrum [arb.u]')
-ax.grid()
 
 x_lim = np.array([x_min,x_max])
 y_lim = np.array([y_min,y_max])
 ax.set_xlim(x_lim)
 ax.set_ylim(y_lim)
+
+for i in range(len(omega)):
+    x = np.array([omega[i], omega[i]])/(2*np.pi)
+    y = np.array([y_min, y_max])
+    ax.plot(x,y)
+    
