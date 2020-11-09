@@ -19,9 +19,9 @@ array = np.genfromtxt('timetrail.csv', delimiter=',', skip_header=1)
 # time = array[:, 5]
 
 fig, ax = plt.subplots()
-ax.plot(array[:, 5], array[:, 3])
-ax.plot(array[:, 5], array[:, 4])
-ax.plot(array[:, 5], array[:, 3]+array[:, 4])
+ax.plot(array[:, 5], array[:, 0])
+ax.plot(array[:, 5], array[:, 1])
+ax.plot(array[:, 5], array[:, 2])
 
 ax.set_xlabel('time (arb.unit)')
 ax.set_ylabel('signal (arb.unit)')
