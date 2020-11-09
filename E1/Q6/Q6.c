@@ -47,11 +47,11 @@ void write_powerspectrum_file(double *q1, double *q2, double *q3,
     fclose(fp);
 }
 
-void write_omega0(double *omega0){
+void write_omega0(double *omega1, double *omega2){
 
     FILE *fp = fopen("omega0.csv", "w");
     fprintf(fp, "omega0\n");
-	    fprintf(fp, "%f\n", *omega0);
+	    fprintf(fp, "%f,%f\n", *omega1, *omega2);
     fclose(fp);
 }
 void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u){
@@ -152,6 +152,7 @@ int main(){
     double m_O = 15.999/9649.0; //12.0*AMU;
     double m_C = 12.0107/9649.0; //12.0*AMU;
     double m[] = {m_O, m_C, m_O};
+    double M = (m_O + m_C)/(m_O*m_C);
     
     double U_kin[n_timesteps];
     double U_pot[n_timesteps];
@@ -185,8 +186,12 @@ int main(){
 
     fft_freq_shift(frequencies, dt, n_timesteps);
     write_powerspectrum_file(fftd_q1, fftd_q2, fftd_q3, frequencies, n_timesteps);
-
-    double omega0 = sqrt(kappa/m[1]);
-    write_omega0(&omega0);
+    
+    /*Analytic eigenfrequencies*/
+    double lambda1 = M+sqrt(M*M-1.0/pow(m_O,2)-2.0/(m_O*m_C));
+    double lambda2 = M-sqrt(M*M-1.0/pow(m_O,2)-2.0/(m_O*m_C));
+    double omega1 = sqrt(kappa*lambda1);
+    double omega2 = sqrt(kappa*lambda2);
+    write_omega0(&omega1, &omega2);
     return 0;
 }
