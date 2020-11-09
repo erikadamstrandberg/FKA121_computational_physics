@@ -28,3 +28,37 @@ ax.set_ylabel('signal (arb.unit)')
 ax.grid()
 
 plt.show()
+
+#%%
+
+array = np.genfromtxt('powerspectrum.csv', delimiter=',', skip_header=1)
+omega0 = np.genfromtxt('omega0.csv', delimiter=',', skip_header=1)
+
+power_spectrum = array[:, 0]+array[:, 1]+array[:, 2]
+scale = omega0/(2*np.pi)
+
+x_min = -100/scale
+x_max = 100/scale
+
+y_min = -0.01
+y_max = max(power_spectrum)
+
+fig, ax = plt.subplots()
+ax.plot(array[:, 3]/scale, power_spectrum)
+
+ax.set_xlabel(r'$\omega_0$')
+ax.set_ylabel(r'power spectrum [arb.u]')
+ax.grid()
+
+x_to_plot = np.array([np.sqrt(2),np.sqrt(2-np.sqrt(2)),np.sqrt(2+np.sqrt(2))])
+
+for i in range(len(x_to_plot)):
+    x = np.array([x_to_plot[i],x_to_plot[i]])
+    y = np.array([y_min,y_max])
+    ax.plot(x,y)
+
+
+x_lim = np.array([x_min,x_max])
+y_lim = np.array([y_min,y_max])
+ax.set_xlim(x_lim)
+ax.set_ylim(y_lim)
