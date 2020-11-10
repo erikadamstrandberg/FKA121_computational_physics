@@ -1,19 +1,6 @@
 /*****************************************************************************
- * E1code4
- ******************************************************************************
- * Routine that runs the velocity verlet algorithm
- * Use as template to construct your program!
- */
-
-
-
-/*
-
- * @a - vector that is filled with acceleration
- * @u - vector with the current positions
- * @m - vector with masses
- * @kappa - Spring constant
- * @size_of_u - the size of the position, acceleration and mass array
+ * Code to solve task 2 for exercise 2
+ *****************************************************************************
  */
 
 #include <stdlib.h>
@@ -27,6 +14,82 @@
 #define AMU GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS
 
 void write_qs_file(double *q1, double *q2, double *q3, 
+                   double *U_kin, double *U_pot,
+                   double *timesteps, int n_points);
+
+void write_powerspectrum_file(double *q1, double *q2, double *q3, 
+                              double *frequencies, int n_points);
+
+void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u);
+
+void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
+		     double *q_2, double *q_3, double dt, double *m,
+		     double kappa, 
+             double *U_kin, double *U_pot);
+
+
+int main(){
+
+    double total_time = 2;
+    double dt = 0.0001;
+    int n_timesteps = total_time/dt;
+    printf("Total number of time steps: %d\n", n_timesteps);
+    int n_particles = 3;
+
+    double kappa = 1000.0*1e-24/(9649.0*AMU);
+    printf("kappa = %f\n", kappa);
+
+    double v1 = 0.0;
+    double v2 = 0.0;
+    double v3 = 0.0;
+    double v[] = {v1, v2, v3};
+    
+    double q1[n_timesteps];
+    double q2[n_timesteps];
+    double q3[n_timesteps];
+    q1[0] = 0.01, q2[0] = 0.005, q3[0] = -0.005;
+
+    double m1 = 12.0/9649.0; //12.0*AMU;
+    double m2 = 12.0/9649.0; //12.0*AMU;
+    double m3 = 12.0/9649.0; //12.0*AMU;
+    double m[] = {m1, m2, m3};
+    
+    double U_kin[n_timesteps];
+    double U_pot[n_timesteps];
+    U_pot[0] = kappa*pow(q1[0], 2);
+
+    velocity_verlet(n_timesteps, n_particles, v, q1, q2, q3, dt, m, kappa, U_kin, U_pot);
+
+    double timesteps[n_timesteps];
+    for (int i = 0; i < n_timesteps; i++) {
+        timesteps[i] = i*dt;
+    }
+
+    write_qs_file(q1, q2, q3, U_kin, U_pot, timesteps, n_timesteps);
+
+    double fftd_q1[n_timesteps];
+    double fftd_q2[n_timesteps];
+    double fftd_q3[n_timesteps];
+    powerspectrum(q1, fftd_q1, n_timesteps); 
+    powerspectrum_shift(fftd_q1, n_timesteps);
+
+    powerspectrum(q2, fftd_q2, n_timesteps);
+    powerspectrum_shift(fftd_q2, n_timesteps);
+
+    powerspectrum(q3, fftd_q3, n_timesteps);
+    powerspectrum_shift(fftd_q3, n_timesteps);
+ 
+    double frequencies[n_timesteps];
+    for(int i = 0; i < n_timesteps; i++){
+	    frequencies[i] = i / (dt *n_timesteps);
+    }
+
+    fft_freq_shift(frequencies, dt, n_timesteps);
+    write_powerspectrum_file(fftd_q1, fftd_q2, fftd_q3, frequencies, n_timesteps);
+}
+
+
+void write_qs_file(double *q1, double *q2, double *q3, 
                    double *U_kin, double *U_pot, 
                    double *timesteps, int n_points){
     FILE *fp = fopen("timetrail.csv", "w");
@@ -36,6 +99,7 @@ void write_qs_file(double *q1, double *q2, double *q3,
     }
     fclose(fp);
 }
+
 
 void write_powerspectrum_file(double *q1, double *q2, double *q3, 
                               double *frequencies, int n_points){
@@ -47,13 +111,7 @@ void write_powerspectrum_file(double *q1, double *q2, double *q3,
     fclose(fp);
 }
 
-void write_omega0(double *omega0){
 
-    FILE *fp = fopen("omega0.csv", "w");
-    fprintf(fp, "omega0\n");
-	    fprintf(fp, "%f\n", *omega0);
-    fclose(fp);
-}
 void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u){
     /* Declaration of variables */
     int i;
@@ -68,16 +126,7 @@ void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u){
     }
 }
 
-/*
- * Perform the velocity verlet alogrithm 
- * @n_timesteps - The number of time steps to be performed
- * @n_particles - number of particles in the system
- * @v - array of velocity (Empty allocated array) - sizeof(q_n) = n_timesteps
- * @q_n - position of the n'th atom : sizeof(q_n) = n_timesteps
- * @dt - timestep
- * @m - vector with masses of atoms sizeof(n_particles)
- * @kappa - Spring constant
- */
+
 void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
 		     double *q_2, double *q_3, double dt, double *m,
 		     double kappa, 
@@ -136,66 +185,3 @@ void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
     }
 }
 
-int main(){
-
-    double total_time = 2;
-    double dt = 0.0001;
-    int n_timesteps = total_time/dt;
-    printf("Total number of time steps: %d\n", n_timesteps);
-    int n_particles = 3;
-
-    double kappa = 1000.0*1e-24/(9649.0*AMU);
-    printf("kappa = %f\n", kappa);
-
-    double v1 = 0.0;
-    double v2 = 0.0;
-    double v3 = 0.0;
-    double v[] = {v1, v2, v3};
-    
-    double q1[n_timesteps];
-    double q2[n_timesteps];
-    double q3[n_timesteps];
-    q1[0] = 0.01, q2[0] = 0.005, q3[0] = -0.005;
-
-    double m1 = 12.0sd/9649.0; //12.0*AMU;
-    double m2 = 12.0/9649.0; //12.0*AMU;
-    double m3 = 12.0/9649.0; //12.0*AMU;
-    double m[] = {m1, m2, m3};
-    
-    double U_kin[n_timesteps];
-    double U_pot[n_timesteps];
-    U_pot[0] = kappa*pow(q1[0], 2);
-
-    velocity_verlet(n_timesteps, n_particles, v, q1, q2, q3, dt, m, kappa, U_kin, U_pot);
-
-    double timesteps[n_timesteps];
-    for (int i = 0; i < n_timesteps; i++) {
-        timesteps[i] = i*dt;
-    }
-
-    write_qs_file(q1, q2, q3, U_kin, U_pot, timesteps, n_timesteps);
-
-    double fftd_q1[n_timesteps];
-    double fftd_q2[n_timesteps];
-    double fftd_q3[n_timesteps];
-    powerspectrum(q1, fftd_q1, n_timesteps); 
-    powerspectrum_shift(fftd_q1, n_timesteps);
-
-    powerspectrum(q2, fftd_q2, n_timesteps);
-    powerspectrum_shift(fftd_q2, n_timesteps);
-
-    powerspectrum(q3, fftd_q3, n_timesteps);
-    powerspectrum_shift(fftd_q3, n_timesteps);
- 
-    double frequencies[n_timesteps];
-    for(int i = 0; i < n_timesteps; i++){
-	    frequencies[i] = i / (dt *n_timesteps);
-    }
-
-    fft_freq_shift(frequencies, dt, n_timesteps);
-    write_powerspectrum_file(fftd_q1, fftd_q2, fftd_q3, frequencies, n_timesteps);
-
-    double omega0 = sqrt(kappa/m[1]);
-    write_omega0(&omega0);
-    return 0;
-}

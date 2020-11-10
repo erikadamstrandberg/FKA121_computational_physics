@@ -43,8 +43,6 @@ ax.grid()
 plt.savefig('energy.pdf', bbox_inches='tight')
 
 
-#%%
-
 array = np.genfromtxt('powerspectrum.csv', delimiter=',', skip_header=1)
 omega0 = np.genfromtxt('omega0.csv', delimiter=',', skip_header=1)
 omega = np.array([0,omega0[0],omega0[1]])
@@ -58,10 +56,8 @@ ax.set_xlabel(r'freq [THz]')
 ax.set_ylabel(r'power spectrum [arb.u]')
 ax.grid()
 
-plt.savefig('powerspectrum_without_analytical.pdf', bbox_inches='tight')
-
-x_min = -100
-x_max = 100
+x_min = 74
+x_max = 75
 
 y_min = -0.01
 y_max = max(power_spectrum)
@@ -71,8 +67,30 @@ y_lim = np.array([y_min,y_max])
 ax.set_xlim(x_lim)
 ax.set_ylim(y_lim)
 
+
 for i in range(len(omega)):
     x = np.array([omega[i], omega[i]])/(2*np.pi)
     y = np.array([y_min, y_max])
+    #ax.plot(x,y)
+    
+    
+fund_cen_1 = 2349.0*1e2
+fund_wavelength_1 = 1/fund_cen_1
+fund_freq_1 = (3e8/fund_wavelength_1)*1e-12
+
+fund_cen_2 = 1333*1e2
+fund_wavelength_2 = 1/fund_cen_2
+fund_freq_2 = (3e8/fund_wavelength_2)*1e-12
+
+x
+freq_measured = np.array([fund_freq_1, fund_freq_2])
+
+for i in range(len(freq_measured)):
+    x = np.array([freq_measured[i], freq_measured[i]])
+    y = np.array([y_min, y_max])
     ax.plot(x,y)
     
+plt.savefig('powerspectrum_with_measured.pdf', bbox_inches='tight')
+
+
+#%%
