@@ -1,7 +1,7 @@
 main = t2
 
 CC ?= gcc # c-compiler
-CFLAGS = # compiler  flags  such as -O3
+CFLAGS = -Werror -pedantic # compiler  flags  such as -O3
 LIBS = -lm -lgsl -lgslcblas  # libraries  such as -lm -lgsl -lgslcblas
 OBJECTS = $(main).o fft.o # object  files  to  produce
 PROGRAM = $(main) # name of  executable  to be  built# build .o files
