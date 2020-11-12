@@ -8,46 +8,49 @@ CC ?= gcc
 PROGRAM = $(MAIN)
 
 # Include all your object files
-OBJECTS = $(MAIN).o fft.o 
+OBJECTS = $(MAIN).o fft.o
 
 # Libraries to be included 
-LIBS = -lm \ 		# Math		
-	   -lgsl \		# GSL
-	   -lgslcblas   # BLAS for GSL
+LIBS = \
+	   -lm \
+	   -lgsl \
+	   -lgslcblas
 
 # Standard run for make
-CFLAGS = -O1 \		# Optimizing
-		 -Wall \	# Enables all errors
-		 -Werror \	# Makes warnings into error
-		 -pedantic	# Code needs to comply with ISO C
+CFLAGS = \
+		 -O1 \
+		 -Wall \
+		 -Werror \
+		 -pedantic
 # I consider to include these flags to be good practice  
 
 # Flags usedfor address-sanitizing debugging
 CFLAGS_ADDRESS = \
-	 	 -Werror \					# Makes warning into errors
-	 	 -pedantic \				# Code need to comply with ISO C
-	 	 -g \						# Makes stack trace human readable
-	 	 -fno-omit-frame-pointer \	# Nicer printed stack trace
-	 	 -fsanitize=address			# Enables address sanitizer
+	 	 -Werror \
+	 	 -pedantic \
+	 	 -g \
+	 	 -fno-omit-frame-pointer \
+	 	 -fsanitize=address
 
 # Flags used for memory-sanitizing debugging
-CFLAGS_MEMORY = \								
-	 	 -Werror \							# Makes warning into erros
-	 	 -pedantic \						# Code needs to comply with ISO C
-	 	 -g \								# Makes stack trace human readable
-	 	 -fPIE \							# Needed for -pie
-	 	 -pie \								# Generates position depedent code
-		 -fsanitize-memory-track-origins \	# Memory sanitizer tracks whole path of uninitalized value
-	 	 -fno-omit-frame-pointer \			# Nicer printed stack trace
-	 	 -fsanitize=memory					# Enables memory sanitizer
+CFLAGS_MEMORY = \
+	 	 -Werror \
+		 -pedantic \
+	 	 -g \
+	 	 -fPIE \
+	 	 -pie \
+		 -fsanitize-memory-track-origins \
+	 	 -fno-omit-frame-pointer \
+	 	 -fsanitize=memory
 
 
-# Definition of make commands
+# Commands for make
 # Standard make
+all: $(MAIN)
+
+# Build .o files
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
-	
-all: $(MAIN)
 $(PROGRAM): $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
@@ -66,7 +69,8 @@ pushclean:
 	rm -rf *.csv
 	rm -rf *.pdf
 	touch *.c
-	
+
+
 # Debugging
 # Adress sanitizing
 address: clean
