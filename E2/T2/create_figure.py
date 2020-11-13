@@ -8,24 +8,41 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #%%
-array = np.genfromtxt('timetrail.csv', delimiter=',', skip_header=1)
-# q1 = array[:, 0]
-# q2 = array[:, 1]
-# q3 = array[:, 2]
+
+m0 = 12*1.66e-27
+k0 = 1600
+
+t = np.sqrt(m0*k0)
+print(t)
+
+
+#%%
+
+m0 = 12*1.66e-27
+t0 = 5.64e-12
+l0 = 1e-10
+eV = 1.602e-19
+
+E0 = m0*l0**2/t0**2
+
+print(E0/eV)
+
+
+#%%
+array = np.genfromtxt('energy.csv', delimiter=',', skip_header=1)
 # U_kin = array[:, 3]
 # U_pot = array[:, 4]
 # time = array[:, 5]
 
 fig, ax = plt.subplots()
-ax.plot(array[:, 5], array[:, 0])
-ax.plot(array[:, 5], array[:, 1])
-ax.plot(array[:, 5], array[:, 2])
+ax.plot(array[:, 2], array[:, 0])
+ax.plot(array[:, 2], array[:, 1])
+ax.plot(array[:, 2], array[:, 0] + array[:,1])
 
 ax.set_xlabel('time (arb.unit)')
 ax.set_ylabel('signal (arb.unit)')
 ax.grid()
 
-plt.savefig('displacement.pdf', bbox_inches='tight')
 
 #%%
 
