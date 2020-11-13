@@ -157,7 +157,7 @@ int main(){
     double q3[n_timesteps];
     q1[0] = 0.01, q2[0] = 0.005, q3[0] = -0.005;
 
-    double m1 = 12.0sd/9649.0; //12.0*AMU;
+    double m1 = 12.0/9649.0; //12.0*AMU;
     double m2 = 12.0/9649.0; //12.0*AMU;
     double m3 = 12.0/9649.0; //12.0*AMU;
     double m[] = {m1, m2, m3};
