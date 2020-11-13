@@ -1,187 +1,75 @@
-/*****************************************************************************
- * Code to solve task 2 for exercise 2
- *****************************************************************************
+/* 
+ * Solveing T2 for E2
  */
 
-#include <stdlib.h>
+// Includes from standard lib
 #include <stdio.h>
-#include <string.h>
-#include <gsl/gsl_const_mksa.h>
 #include <math.h>
+#include <stdlib.h>
 
+// Our own packages
 #include "fft.h"
 
-#define AMU GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS
+// Defined variables
+#define N_PARTICLES 32
+#define PI 3.141592653589
 
-void write_qs_file(double *q1, double *q2, double *q3, 
-                   double *U_kin, double *U_pot,
-                   double *timesteps, int n_points);
 
-void write_powerspectrum_file(double *q1, double *q2, double *q3, 
-                              double *frequencies, int n_points);
+void construct_transformation_matrix(
+                            double trans_matrix[N_PARTICLES][N_PARTICLES], 
+                            int n_particles);
 
-void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u);
-
-void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
-		     double *q_2, double *q_3, double dt, double *m,
-		     double kappa, 
-             double *U_kin, double *U_pot);
+void transform_to_normal_modes(
+                            double trans_matrix[N_PARTICLES][N_PARTICLES],
+			                int n_particles,
+			                double *q, double *Q);
 
 
 int main(){
+    double trans_matrix[N_PARTICLES][N_PARTICLES];
+    double q[N_PARTICLES];
+    double Q[N_PARTICLES];
 
-    double total_time = 2;
-    double dt = 0.0001;
-    int n_timesteps = total_time/dt;
-    printf("Total number of time steps: %d\n", n_timesteps);
-    int n_particles = 3;
+    construct_transformation_matrix(trans_matrix, N_PARTICLES);
 
-    double kappa = 1000.0*1e-24/(9649.0*AMU);
-    printf("kappa = %f\n", kappa);
+    // Evolove system in time
 
-    double v1 = 0.0;
-    double v2 = 0.0;
-    double v3 = 0.0;
-    double v[] = {v1, v2, v3};
-    
-    double q1[n_timesteps];
-    double q2[n_timesteps];
-    double q3[n_timesteps];
-    q1[0] = 0.01, q2[0] = 0.005, q3[0] = -0.005;
-
-    double m1 = 12.0/9649.0; //12.0*AMU;
-    double m2 = 12.0/9649.0; //12.0*AMU;
-    double m3 = 12.0/9649.0; //12.0*AMU;
-    double m[] = {m1, m2, m3};
-    
-    double U_kin[n_timesteps];
-    double U_pot[n_timesteps];
-    U_pot[0] = kappa*pow(q1[0], 2);
-
-    velocity_verlet(n_timesteps, n_particles, v, q1, q2, q3, dt, m, kappa, U_kin, U_pot);
-
-    double timesteps[n_timesteps];
-    for (int i = 0; i < n_timesteps; i++) {
-        timesteps[i] = i*dt;
-    }
-
-    write_qs_file(q1, q2, q3, U_kin, U_pot, timesteps, n_timesteps);
-
-    double fftd_q1[n_timesteps];
-    double fftd_q2[n_timesteps];
-    double fftd_q3[n_timesteps];
-    powerspectrum(q1, fftd_q1, n_timesteps); 
-    powerspectrum_shift(fftd_q1, n_timesteps);
-
-    powerspectrum(q2, fftd_q2, n_timesteps);
-    powerspectrum_shift(fftd_q2, n_timesteps);
-
-    powerspectrum(q3, fftd_q3, n_timesteps);
-    powerspectrum_shift(fftd_q3, n_timesteps);
- 
-    double frequencies[n_timesteps];
-    for(int i = 0; i < n_timesteps; i++){
-	    frequencies[i] = i / (dt *n_timesteps);
-    }
-
-    fft_freq_shift(frequencies, dt, n_timesteps);
-    write_powerspectrum_file(fftd_q1, fftd_q2, fftd_q3, frequencies, n_timesteps);
+    transform_to_normal_modes(trans_matrix, N_PARTICLES, q, Q);
+    return 0;
 }
 
 
-void write_qs_file(double *q1, double *q2, double *q3, 
-                   double *U_kin, double *U_pot, 
-                   double *timesteps, int n_points){
-    FILE *fp = fopen("timetrail.csv", "w");
-    fprintf(fp, "q1,q2,q3,U_kin,U_pot,time\n");
-    for(int i = 0; i < n_points; ++i){
-	    fprintf(fp, "%f,%f,%f,%f,%f,%f\n", q1[i], q2[i], q3[i], U_kin[i], U_pot[i], timesteps[i]);
-    }
-    fclose(fp);
-}
-
-
-void write_powerspectrum_file(double *q1, double *q2, double *q3, 
-                              double *frequencies, int n_points){
-    FILE *fp = fopen("powerspectrum.csv", "w");
-    fprintf(fp, "q1,q2,q3,frequencies\n");
-    for(int i = 0; i < n_points; ++i){
-	    fprintf(fp, "%f,%f,%f,%f\n", q1[i], q2[i], q3[i], frequencies[i]);
-    }
-    fclose(fp);
-}
-
-
-void calc_acc(double *a, double *u, double *m, double kappa, int size_of_u){
-    /* Declaration of variables */
-    int i;
-    
-    /* Calculating the acceleration on the boundaries */
-    a[0] = kappa*(-2*u[0] + u[1])/m[0];
-    a[size_of_u - 1] = kappa*(u[size_of_u - 2] - 2*u[size_of_u - 1])/m[size_of_u - 1];
-    
-    /* Calculating the acceleration of the inner points */
-    for (i = 1; i < size_of_u - 1; i++){
-        a[i] = kappa*(u[i - 1] - 2*u[i] + u[i + 1])/m[i];
+/*
+ * trans_matrix[N_PARTICLES][N_PARTICLES]: empty allocated array which
+ * will be filled with sine transformation matrix
+ * N_PARTICLES: number of particles in system
+ */
+void construct_transformation_matrix(
+    double trans_matrix[N_PARTICLES][N_PARTICLES], int n_particles){
+    double factor = 1 / ((double)n_particles + 1);
+    for(int i = 0; i < n_particles; i++){
+	    for(int j = 0; j < n_particles; j++){
+	        trans_matrix[i][j] = sqrt(2 * factor)
+			    	 * sin((j + 1) * (i + 1) * PI * factor);
+	    }
     }
 }
 
-
-void velocity_verlet(int n_timesteps, int n_particles, double *v, double *q_1,
-		     double *q_2, double *q_3, double dt, double *m,
-		     double kappa, 
-             double *U_kin, double *U_pot){
-    double q[n_particles];
-    double a[n_particles];
-    q[0] = q_1[0];
-    q[1] = q_2[0];
-    q[2] = q_3[0];
-    calc_acc(a, q, m, kappa, n_particles);
-    for (int i = 1; i < n_timesteps + 1; i++) {
-
-        if (i%100 == 0) {
-            printf("Working on timestep: %d\n", i);
-        }
-
-        /* v(t+dt/2) */
-        for (int j = 0; j < n_particles; j++) {
-            v[j] += dt * 0.5 * a[j];
-        }
-        
-        /* q(t+dt) */
-        for (int j = 0; j < n_particles; j++) {
-            q[j] += dt * v[j];
-        }
-        
-        /* a(t+dt) */
-        calc_acc(a, q, m, kappa, n_particles);
-        
-        /* v(t+dt) */
-        for (int j = 0; j < n_particles; j++) {
-            v[j] += dt * 0.5 * a[j];
-        }
-        
-        /*U_kin(t+dt) */
-        for (int j = 0; j < n_particles; j++) {
-
-            U_kin[i] += m[j]*pow(v[j], 2)/2.0;
-
-        }
-
-        /*U_pot(t+dt) */
-        for (int j = 0; j < n_particles+1; j++) {
-            if(j == 0) {
-                U_pot[i] += pow(q[j], 2)*kappa/2.0;
-            } else if(j == n_particles){
-                U_pot[i] += pow(q[j-1], 2)*kappa/2.0;
-            }else{
-                U_pot[i] += pow(q[j]-q[j-1], 2)*kappa/2.0;
-            }
-        }
-        /* Save the displacement of the three atoms */
-        q_1[i] = q[0];
-        q_2[i] = q[1];
-        q_3[i] = q[2];
+/*
+ * Transformation matrix constucted in above function
+ * q cartesian coordinate of paricles
+ * Q output normal modes coordinate
+ * N_PARTICLES is number of particles in system
+ */
+void transform_to_normal_modes(double trans_matrix[N_PARTICLES][N_PARTICLES],
+			       int n_particles,
+			       double *q, double *Q){
+    for(int i = 0; i < n_particles; i++){
+	    double sum = 0;
+	    for(int j = 0; j < n_particles; j++){
+	        sum += q[j] * trans_matrix[i][j];
+	    }
+	Q[i] = sum;
     }
 }
 
