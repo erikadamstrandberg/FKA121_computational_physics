@@ -14,7 +14,7 @@
 
 
 // Defined variables
-#define N_PARTICLES 3
+#define N_PARTICLES 32
 #define PI 3.141592653589
 #define AMU GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS
 
@@ -30,11 +30,16 @@ void transform_to_normal_modes(
 			                double *q, double *Q);
 
 void write_energy_file(double *U_kin, double *U_pot, 
-                   double *timesteps, int n_timesteps){
+                   double *timesteps, int n_timesteps, int save_every){
     FILE *fp = fopen("energy.csv", "w");
     fprintf(fp, "U_kin,U_pot,time\n");
+
+    int count = 0;
     for(int i = 0; i < n_timesteps; ++i){
-	    fprintf(fp, "%f,%f,%f\n", U_kin[i], U_pot[i], timesteps[i]);
+        if (i%save_every == 0){
+	        fprintf(fp, "%f,%f,%f\n", U_kin[count], U_pot[count], timesteps[i]);
+            count += 1;
+        }
     }
     fclose(fp);
 }
@@ -79,8 +84,9 @@ void velocity_verlet(int n_timesteps, int n_particles,
         }
     }
 
-
     calc_acc(a, q, m, kappa, alpha, n_particles);
+
+    int count = 1;
     for (int i = 1; i < n_timesteps + 1; i++) {
 
         for (int j = 0; j < n_particles; j++) {
@@ -102,67 +108,77 @@ void velocity_verlet(int n_timesteps, int n_particles,
         
 
         if (i%save_every == 0){
-
             printf("Saving timestep: %d\n", i);
             
             /*U_kin(t+dt) */
             for (int j = 0; j < n_particles; j++) {
-                U_kin[i] += m[j]*pow(v[j], 2)/2.0;
+                U_kin[count] += m[j]*pow(v[j], 2)/2.0;
             }
 
             /*U_pot(t+dt) */
             for (int j = 0; j < n_particles+1; j++) {
                 if(j == 0) {
-                    U_pot[i] += pow(q[j], 2)*kappa/2.0;
+                    U_pot[count] += pow(q[j], 2)*kappa/2.0;
                 } else if(j == n_particles){
-                    U_pot[i] += pow(q[j-1], 2)*kappa/2.0;
+                    U_pot[count] += pow(q[j-1], 2)*kappa/2.0;
                 } else{
-                    U_pot[i] += pow(q[j]-q[j-1], 2)*kappa/2.0;
+                    U_pot[count] += pow(q[j]-q[j-1], 2)*kappa/2.0;
                 }
             }
+            count += 1;
         }
     }
 }
+
+
 // Main stuff
 int main(){
     double trans_matrix[N_PARTICLES][N_PARTICLES];
-    double q[N_PARTICLES];
+    construct_transformation_matrix(trans_matrix, N_PARTICLES);
     double Q[N_PARTICLES];
-
+    double P[N_PARTICLES];
+    double q[N_PARTICLES];
     double v[N_PARTICLES];
     double m[N_PARTICLES];
 
     for (int i = 0; i < N_PARTICLES; i++){
-        q[i] = 0;
-        m[i] = 12.0/9649.0;
-        v[i] = 0;
+        Q[i] = 0;
+        P[i] = 0;
     }
 
-    q[0] = 0.01;
-    q[1] = 0.005;
-    q[2] = -0.005;
+    double E0 = 32.0;
+    P[8] = sqrt(2.0*E0);
+
+    printf("P[1] before %f", P[1]);
+
+    transform_to_normal_modes(trans_matrix, N_PARTICLES, P, v);
+
+    for (int i = 0; i < N_PARTICLES; i++){
+        q[i] = 0;
+        m[i] = 1;
+    }
 
     int save_every = 1;
 
-    construct_transformation_matrix(trans_matrix, N_PARTICLES);
-
-    double total_time = 1;
+    double total_time = 10;
     double dt = 0.0001;
     int n_timesteps = total_time/dt;
     printf("Total number of time steps: %d\n", n_timesteps);
 
-    double kappa = 1600.0*1e-24/(9649.0*AMU);
+    double kappa = 1;
     double alpha = 0;
-    printf("kappa = %f\n", kappa);
 
     // Time scaling comes from m and kappa 
     // t = sqrt(mk)
     //
     // We set the length scale to ångstrom
     // This gives the scaling factor for energy as
-    
-    double U_kin[n_timesteps/save_every];
-    double U_pot[n_timesteps/save_every];
+    printf("%d", n_timesteps/save_every);
+
+    int energy_length = n_timesteps/save_every + 1;
+    double U_kin[energy_length];
+    double U_pot[energy_length];
+    printf("%d", energy_length);
 
     for (int i = 0; i < n_timesteps; i++){
         U_kin[i] = 0;
@@ -176,8 +192,17 @@ int main(){
         timesteps[i] = i*dt;
     }
  
-    write_energy_file(U_kin, U_pot, timesteps, n_timesteps);
+    write_energy_file(U_kin, U_pot, timesteps, n_timesteps, save_every);
+
+    transform_to_normal_modes(trans_matrix, N_PARTICLES, v, P);
     transform_to_normal_modes(trans_matrix, N_PARTICLES, q, Q);
+    
+    double E_mode[N_PARTICLES];
+    for (int i = 0; i < N_PARTICLES; i++){
+        E_mode[i] = (1.0/2.0)*(P[i]+Q[i]);
+        printf("Mode number %d has energy %.20f\n", i, E_mode[i]);
+    }    
+
     return 0;
 }
 
@@ -207,13 +232,13 @@ void construct_transformation_matrix(
  */
 void transform_to_normal_modes(double trans_matrix[N_PARTICLES][N_PARTICLES],
 			       int n_particles,
-			       double *q, double *Q){
+			       double *from, double *to){
     for(int i = 0; i < n_particles; i++){
 	    double sum = 0;
 	    for(int j = 0; j < n_particles; j++){
-	        sum += q[j] * trans_matrix[i][j];
+	        sum += from[j] * trans_matrix[i][j];
 	    }
-	Q[i] = sum;
+	to[i] = sum;
     }
 }
 
