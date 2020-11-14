@@ -8,7 +8,7 @@ CC ?= gcc
 PROGRAM = $(MAIN)
 
 # Include all your object files
-OBJECTS = $(MAIN).o fft.o
+OBJECTS = $(MAIN).o fft.o transform.o calc_acc.o
 
 # Libraries to be included 
 LIBS = \

@@ -6,34 +6,19 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <gsl/gsl_const_mksa.h>
-
 
 // Our own packages
 #include "fft.h"
-
+#include "transform.h"
+#include "calc_acc.h"
 
 // Defined variables
 #define N_PARTICLES 32
 #define PI 3.141592653589
-#define AMU GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS
-
 
 // Prototypes
-void construct_transformation_matrix(
-                            double trans_matrix[N_PARTICLES][N_PARTICLES], 
-                            int n_particles);
-
-void transform_to_normal_modes(
-                            double trans_matrix[N_PARTICLES][N_PARTICLES],
-			                int n_particles,
-			                double *q, double *Q);
-
 void write_energy_file(double *U_kin, double *U_pot, 
                    double *timesteps, int n_timesteps, int save_every);
-
-
-void calc_acc(double *a, double *u, double *m, double kappa, double alpha, int size_of_u);
 
 void velocity_verlet(int n_timesteps, int n_particles,
                      double *v, double *q,
@@ -59,12 +44,12 @@ int main(){
     construct_transformation_matrix(trans_matrix, N_PARTICLES);
      
     double kappa = 1;
-    double alpha = 0;
+    double alpha = 0.1;
     double E0 = 32.0;
 
     // Simulation values
-    int save_every = 500;
-    double total_time = 25000;
+    int save_every = 10000;
+    double total_time = 100000;
     double dt = 0.1;
     int n_timesteps = total_time/dt;
     
@@ -114,41 +99,6 @@ int main(){
 }
 
 
-// Functions
-/*
- * trans_matrix[N_PARTICLES][N_PARTICLES]: empty allocated array which
- * will be filled with sine transformation matrix
- * N_PARTICLES: number of particles in system
- */
-void construct_transformation_matrix(
-    double trans_matrix[N_PARTICLES][N_PARTICLES], int n_particles){
-    double factor = 1 / ((double)n_particles + 1);
-    for(int i = 0; i < n_particles; i++){
-	    for(int j = 0; j < n_particles; j++){
-	        trans_matrix[i][j] = sqrt(2 * factor)
-			    	 * sin((j + 1) * (i + 1) * PI * factor);
-	    }
-    }
-}
-
-/*
- * Transformation matrix constucted in above function
- * q cartesian coordinate of paricles
- * Q output normal modes coordinate
- * N_PARTICLES is number of particles in system
- */
-void transform_to_normal_modes(double trans_matrix[N_PARTICLES][N_PARTICLES],
-			       int n_particles,
-			       double *from, double *to){
-    for(int i = 0; i < n_particles; i++){
-	    double sum = 0;
-	    for(int j = 0; j < n_particles; j++){
-	        sum += from[j] * trans_matrix[i][j];
-	    }
-	to[i] = sum;
-    }
-}
-
 void write_energy_file(double *U_kin, double *U_pot, 
                    double *timesteps, int n_timesteps, int save_every){
     FILE *fp = fopen("energy.csv", "w");
@@ -164,22 +114,7 @@ void write_energy_file(double *U_kin, double *U_pot,
     fclose(fp);
 }
 
-void calc_acc(double *a, double *u, double *m, double kappa, double alpha, int size_of_u){
-    int i;
-
-    /* Calculating the acceleration on the boundaries */
-    a[0] = kappa*(-2*u[0] + u[1])/m[0]
-          -alpha*(pow(u[0],2)-pow(u[1]-u[0],2))/m[0];
-    a[size_of_u - 1] = kappa*(u[size_of_u - 2] - 2*u[size_of_u - 1])/m[size_of_u - 1]
-          -alpha*(pow(u[size_of_u-1]-u[size_of_u-2],2)-pow(u[size_of_u-1],2))/m[size_of_u-1];
-
-    /* Calculating the acceleration of the inner points */
-    for (i = 1; i < size_of_u - 1; i++){
-        a[i] = kappa*(u[i-1]-2*u[i]+u[i+1])/m[i]
-              -alpha*(pow(u[i]-u[i-1],2)-pow(u[i+1]-u[i],2))/m[i];
-    }
-}
-
+ 
 void velocity_verlet(int n_timesteps, int n_particles,
                      double *v, double *q,
                      double dt,
@@ -232,7 +167,6 @@ void velocity_verlet(int n_timesteps, int n_particles,
 
         if (i%save_every == 0){
             printf("Saving timestep: %d\n", i);
-            printf("%d", count); 
             /*U_kin(t+dt) */
             for (int j = 0; j < n_particles; j++) {
                 U_kin[count] += m[j]*pow(v[j], 2)/2.0;
