@@ -17,8 +17,9 @@
 #define PI 3.141592653589
 
 // Prototypes
-void write_energy_file(double *U_kin, double *U_pot, 
+void write_energy_ord_file(double *U_kin, double *U_pot, 
                    double *timesteps, int n_timesteps, int save_every);
+void write_energy_norm_file(double E_mode[][N_PARTICLES], int energy_length);
 
 void velocity_verlet(int n_timesteps, int n_particles,
                      double *v, double *q,
@@ -45,14 +46,16 @@ int main(){
      
     double kappa = 1;
     double alpha = 0.1;
-    double E0 = 32.0;
+    double E0    = 32.0;
 
     // Simulation values
-    int save_every = 10000;
-    double total_time = 100000;
-    double dt = 0.1;
-    int n_timesteps = total_time/dt;
+    double total_time = 2500;
+    double dt         = 0.1;
     
+    // How many timesteps to save
+    int save_every    = 1000;
+
+    int n_timesteps = total_time/dt;
     int energy_length = n_timesteps/save_every;
         
     for (int i = 0; i < N_PARTICLES; i++){
@@ -78,30 +81,56 @@ int main(){
         U_pot[i] = 0;
     }
 
+    double E_mode[energy_length][N_PARTICLES];
+
     printf("Total number of time steps: %d\n", n_timesteps);
     velocity_verlet(n_timesteps, N_PARTICLES, v, q, dt, m, kappa, alpha, U_kin, U_pot, save_every);
 
-    write_energy_file(U_kin, U_pot, timesteps, n_timesteps, save_every);
+    write_energy_ord_file(U_kin, U_pot, timesteps, n_timesteps, save_every);
 
     transform_to_normal_modes(trans_matrix, N_PARTICLES, v, P);
     transform_to_normal_modes(trans_matrix, N_PARTICLES, q, Q);
     
     double E_tot = 0.0;
-    double E_mode[N_PARTICLES];
     for (int i = 0; i < N_PARTICLES; i++){
-        E_mode[i] = (1.0/2.0)*(pow(P[i],2)+pow(Q[i]*w[i],2));
-        E_tot += E_mode[i];
-        printf("Mode number %d has energy %.10f\n", i, E_mode[i]);
+        E_mode[energy_length][i] = (1.0/2.0)*(pow(P[i],2)+pow(Q[i]*w[i],2));
+        E_tot += E_mode[energy_length][i];
+        printf("Mode number %d has energy %.10f\n", i, E_mode[i][energy_length]);
     }
 
+
+    for(int i = 0; i < N_PARTICLES; i++){
+        for(int j = 0; j < energy_length; j++){
+            E_mode[j][i] = j;
+        }
+    }
+
+
+    write_energy_norm_file(E_mode, energy_length);
     printf("Total energy is %.10f\n", E_tot);
     return 0;
 }
 
+void write_energy_norm_file(double E_mode[][N_PARTICLES], int energy_length){
+    FILE *fp = fopen("energy_norm.csv", "w");
+    fprintf(fp, "modes\n");
 
-void write_energy_file(double *U_kin, double *U_pot, 
+    for(int i = 0; i < energy_length; i++){
+        for(int j = 0; j < N_PARTICLES; j++){
+            if (j == N_PARTICLES-1){
+                fprintf(fp, "%f", E_mode[i][j]);  
+            } else {
+                fprintf(fp, "%f,", E_mode[i][j]);
+            }
+        }
+        fprintf(fp, "\n");
+    }
+}
+
+
+void write_energy_ord_file(double *U_kin, double *U_pot, 
                    double *timesteps, int n_timesteps, int save_every){
-    FILE *fp = fopen("energy.csv", "w");
+    FILE *fp = fopen("energy_ord.csv", "w");
     fprintf(fp, "U_kin,U_pot,time\n");
 
     int count = 0;
@@ -175,11 +204,11 @@ void velocity_verlet(int n_timesteps, int n_particles,
             /*U_pot(t+dt) */
             for (int j = 0; j < n_particles+1; j++) {
                 if(j == 0) {
-                    U_pot[count] += pow(q[j], 2)*kappa/2.0;
+                    U_pot[count] += pow(q[j], 2)*kappa/2.0 + pow(q[j], 3)*alpha/3.0;
                 } else if(j == n_particles){
-                    U_pot[count] += pow(q[j-1], 2)*kappa/2.0;
+                    U_pot[count] += pow(q[j-1], 2)*kappa/2.0 + pow(q[j-1], 3)*alpha/3.0;
                 } else{
-                    U_pot[count] += pow(q[j]-q[j-1], 2)*kappa/2.0;
+                    U_pot[count] += pow(q[j]-q[j-1], 2)*kappa/2.0 + pow(q[j]-q[j-1], 3)*alpha/3.0;
                 }
             }
             count += 1;
