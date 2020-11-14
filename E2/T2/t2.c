@@ -30,6 +30,132 @@ void transform_to_normal_modes(
 			                double *q, double *Q);
 
 void write_energy_file(double *U_kin, double *U_pot, 
+                   double *timesteps, int n_timesteps, int save_every);
+
+
+void calc_acc(double *a, double *u, double *m, double kappa, double alpha, int size_of_u);
+
+void velocity_verlet(int n_timesteps, int n_particles,
+                     double *v, double *q,
+                     double dt,
+                     double *m,
+		             double kappa, 
+                     double alpha,
+                     double *U_kin, 
+                     double *U_pot,
+                     int save_every);
+
+
+// Main stuff
+int main(){
+    double trans_matrix[N_PARTICLES][N_PARTICLES];
+    construct_transformation_matrix(trans_matrix, N_PARTICLES);
+    double Q[N_PARTICLES];
+    double P[N_PARTICLES];
+    double w[N_PARTICLES];
+    double q[N_PARTICLES];
+    double v[N_PARTICLES];
+    double m[N_PARTICLES];
+    double kappa = 1;
+    double alpha = 0.1;
+    double E0 = 32.0;
+
+    for (int i = 0; i < N_PARTICLES; i++){
+        Q[i] = 0;
+        P[i] = 0;
+        m[i] = 1;
+        w[i] = 2.0*sin((i+1)*PI/(2*(N_PARTICLES+1)));
+    }
+
+    P[2] = sqrt(2.0*E0);
+
+    transform_to_normal_modes(trans_matrix, N_PARTICLES, P, v);
+    transform_to_normal_modes(trans_matrix, N_PARTICLES, Q, q);
+
+    int save_every = 1;
+    double total_time = 20;
+    double dt = 0.0001;
+    int n_timesteps = total_time/dt;
+    printf("Total number of time steps: %d\n", n_timesteps);
+
+    // Time scaling comes from m and kappa 
+    // t = sqrt(mk)
+    //
+    // We set the length scale to ångstrom
+    // This gives the scaling factor for energy as
+    printf("%d", n_timesteps/save_every);
+
+    int energy_length = n_timesteps/save_every + 1;
+    double U_kin[energy_length];
+    double U_pot[energy_length];
+    printf("%d", energy_length);
+
+    for (int i = 0; i < n_timesteps; i++){
+        U_kin[i] = 0;
+        U_pot[i] = 0;
+    }
+
+    velocity_verlet(n_timesteps, N_PARTICLES, v, q, dt, m, kappa, alpha, U_kin, U_pot, save_every);
+
+    double timesteps[n_timesteps];
+    for (int i = 0; i < n_timesteps; i++) {
+        timesteps[i] = i*dt;
+    }
+ 
+    write_energy_file(U_kin, U_pot, timesteps, n_timesteps, save_every);
+
+    transform_to_normal_modes(trans_matrix, N_PARTICLES, v, P);
+    transform_to_normal_modes(trans_matrix, N_PARTICLES, q, Q);
+    
+    double E_tot = 0.0;
+    double E_mode[N_PARTICLES];
+    for (int i = 0; i < N_PARTICLES; i++){
+        E_mode[i] = (1.0/2.0)*(pow(P[i],2)+pow(Q[i]*w[i],2));
+        E_tot += E_mode[i];
+        printf("Mode number %d has energy %.20f\n", i, E_mode[i]);
+    }    
+    printf("Total energy is %.20f\n", E_tot);
+
+    return 0;
+}
+
+
+// Functions
+/*
+ * trans_matrix[N_PARTICLES][N_PARTICLES]: empty allocated array which
+ * will be filled with sine transformation matrix
+ * N_PARTICLES: number of particles in system
+ */
+void construct_transformation_matrix(
+    double trans_matrix[N_PARTICLES][N_PARTICLES], int n_particles){
+    double factor = 1 / ((double)n_particles + 1);
+    for(int i = 0; i < n_particles; i++){
+	    for(int j = 0; j < n_particles; j++){
+	        trans_matrix[i][j] = sqrt(2 * factor)
+			    	 * sin((j + 1) * (i + 1) * PI * factor);
+	    }
+    }
+}
+
+/*
+ * Transformation matrix constucted in above function
+ * q cartesian coordinate of paricles
+ * Q output normal modes coordinate
+ * N_PARTICLES is number of particles in system
+ */
+void transform_to_normal_modes(double trans_matrix[N_PARTICLES][N_PARTICLES],
+			       int n_particles,
+			       double *from, double *to){
+    for(int i = 0; i < n_particles; i++){
+	    double sum = 0;
+	    for(int j = 0; j < n_particles; j++){
+	        sum += from[j] * trans_matrix[i][j];
+	    }
+	to[i] = sum;
+    }
+}
+
+void write_energy_file(double *U_kin, double *U_pot, 
                    double *timesteps, int n_timesteps, int save_every){
     FILE *fp = fopen("energy.csv", "w");
     fprintf(fp, "U_kin,U_pot,time\n");
@@ -46,14 +172,17 @@ void write_energy_file(double *U_kin, double *U_pot,
 
 void calc_acc(double *a, double *u, double *m, double kappa, double alpha, int size_of_u){
     int i;
-    
+
     /* Calculating the acceleration on the boundaries */
-    a[0] = kappa*(-2*u[0] + u[1])/m[0];
-    a[size_of_u - 1] = kappa*(u[size_of_u - 2] - 2*u[size_of_u - 1])/m[size_of_u - 1];
+    a[0] = kappa*(-2*u[0] + u[1])/m[0]
+          -alpha*(pow(u[0],2)-pow(u[1]-u[0],2))/m[0];
+    a[size_of_u - 1] = kappa*(u[size_of_u - 2] - 2*u[size_of_u - 1])/m[size_of_u - 1]
+          -alpha*(pow(u[size_of_u-1]-u[size_of_u-2],2)-pow(u[size_of_u-1],2))/m[size_of_u-1];
 
     /* Calculating the acceleration of the inner points */
     for (i = 1; i < size_of_u - 1; i++){
-        a[i] = kappa*(u[i - 1] - 2*u[i] + u[i + 1])/m[i];
+        a[i] = kappa*(u[i-1]-2*u[i]+u[i+1])/m[i]
+              -alpha*(pow(u[i]-u[i-1],2)-pow(u[i+1]-u[i],2))/m[i];
     }
 }
 
@@ -127,118 +256,6 @@ void velocity_verlet(int n_timesteps, int n_particles,
             }
             count += 1;
         }
-    }
-}
-
-
-// Main stuff
-int main(){
-    double trans_matrix[N_PARTICLES][N_PARTICLES];
-    construct_transformation_matrix(trans_matrix, N_PARTICLES);
-    double Q[N_PARTICLES];
-    double P[N_PARTICLES];
-    double q[N_PARTICLES];
-    double v[N_PARTICLES];
-    double m[N_PARTICLES];
-
-    for (int i = 0; i < N_PARTICLES; i++){
-        Q[i] = 0;
-        P[i] = 0;
-    }
-
-    double E0 = 32.0;
-    P[8] = sqrt(2.0*E0);
-
-    printf("P[1] before %f", P[1]);
-
-    transform_to_normal_modes(trans_matrix, N_PARTICLES, P, v);
-
-    for (int i = 0; i < N_PARTICLES; i++){
-        q[i] = 0;
-        m[i] = 1;
-    }
-
-    int save_every = 1;
-
-    double total_time = 10;
-    double dt = 0.0001;
-    int n_timesteps = total_time/dt;
-    printf("Total number of time steps: %d\n", n_timesteps);
-
-    double kappa = 1;
-    double alpha = 0;
-
-    // Time scaling comes from m and kappa 
-    // t = sqrt(mk)
-    //
-    // We set the length scale to ångstrom
-    // This gives the scaling factor for energy as
-    printf("%d", n_timesteps/save_every);
-
-    int energy_length = n_timesteps/save_every + 1;
-    double U_kin[energy_length];
-    double U_pot[energy_length];
-    printf("%d", energy_length);
-
-    for (int i = 0; i < n_timesteps; i++){
-        U_kin[i] = 0;
-        U_pot[i] = 0;
-    }
-
-    velocity_verlet(n_timesteps, N_PARTICLES, v, q, dt, m, kappa, alpha, U_kin, U_pot, save_every);
-
-    double timesteps[n_timesteps];
-    for (int i = 0; i < n_timesteps; i++) {
-        timesteps[i] = i*dt;
-    }
- 
-    write_energy_file(U_kin, U_pot, timesteps, n_timesteps, save_every);
-
-    transform_to_normal_modes(trans_matrix, N_PARTICLES, v, P);
-    transform_to_normal_modes(trans_matrix, N_PARTICLES, q, Q);
-    
-    double E_mode[N_PARTICLES];
-    for (int i = 0; i < N_PARTICLES; i++){
-        E_mode[i] = (1.0/2.0)*(P[i]+Q[i]);
-        printf("Mode number %d has energy %.20f\n", i, E_mode[i]);
-    }    
-
-    return 0;
-}
-
-
-// Functions
-/*
- * trans_matrix[N_PARTICLES][N_PARTICLES]: empty allocated array which
- * will be filled with sine transformation matrix
- * N_PARTICLES: number of particles in system
- */
-void construct_transformation_matrix(
-    double trans_matrix[N_PARTICLES][N_PARTICLES], int n_particles){
-    double factor = 1 / ((double)n_particles + 1);
-    for(int i = 0; i < n_particles; i++){
-	    for(int j = 0; j < n_particles; j++){
-	        trans_matrix[i][j] = sqrt(2 * factor)
-			    	 * sin((j + 1) * (i + 1) * PI * factor);
-	    }
-    }
-}
-
-/*
- * Transformation matrix constucted in above function
- * q cartesian coordinate of paricles
- * Q output normal modes coordinate
- * N_PARTICLES is number of particles in system
- */
-void transform_to_normal_modes(double trans_matrix[N_PARTICLES][N_PARTICLES],
-			       int n_particles,
-			       double *from, double *to){
-    for(int i = 0; i < n_particles; i++){
-	    double sum = 0;
-	    for(int j = 0; j < n_particles; j++){
-	        sum += from[j] * trans_matrix[i][j];
-	    }
-	to[i] = sum;
     }
 }
 
