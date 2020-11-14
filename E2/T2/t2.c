@@ -48,60 +48,54 @@ void velocity_verlet(int n_timesteps, int n_particles,
 
 // Main stuff
 int main(){
-    double trans_matrix[N_PARTICLES][N_PARTICLES];
-    construct_transformation_matrix(trans_matrix, N_PARTICLES);
     double Q[N_PARTICLES];
     double P[N_PARTICLES];
     double w[N_PARTICLES];
     double q[N_PARTICLES];
     double v[N_PARTICLES];
     double m[N_PARTICLES];
+    double trans_matrix[N_PARTICLES][N_PARTICLES];
+
+    construct_transformation_matrix(trans_matrix, N_PARTICLES);
+     
     double kappa = 1;
-    double alpha = 0.1;
+    double alpha = 0;
     double E0 = 32.0;
 
+    // Simulation values
+    int save_every = 500;
+    double total_time = 25000;
+    double dt = 0.1;
+    int n_timesteps = total_time/dt;
+    
+    int energy_length = n_timesteps/save_every;
+        
     for (int i = 0; i < N_PARTICLES; i++){
         Q[i] = 0;
         P[i] = 0;
         m[i] = 1;
         w[i] = 2.0*sin((i+1)*PI/(2*(N_PARTICLES+1)));
     }
-
-    P[2] = sqrt(2.0*E0);
+    P[0] = sqrt(2.0*E0);
 
     transform_to_normal_modes(trans_matrix, N_PARTICLES, P, v);
     transform_to_normal_modes(trans_matrix, N_PARTICLES, Q, q);
-
-    int save_every = 1;
-    double total_time = 20;
-    double dt = 0.0001;
-    int n_timesteps = total_time/dt;
-    printf("Total number of time steps: %d\n", n_timesteps);
-
-    // Time scaling comes from m and kappa 
-    // t = sqrt(mk)
-    //
-    // We set the length scale to ångstrom
-    // This gives the scaling factor for energy as
-    printf("%d", n_timesteps/save_every);
-
-    int energy_length = n_timesteps/save_every + 1;
-    double U_kin[energy_length];
-    double U_pot[energy_length];
-    printf("%d", energy_length);
-
-    for (int i = 0; i < n_timesteps; i++){
-        U_kin[i] = 0;
-        U_pot[i] = 0;
-    }
-
-    velocity_verlet(n_timesteps, N_PARTICLES, v, q, dt, m, kappa, alpha, U_kin, U_pot, save_every);
 
     double timesteps[n_timesteps];
     for (int i = 0; i < n_timesteps; i++) {
         timesteps[i] = i*dt;
     }
  
+    double U_kin[energy_length];
+    double U_pot[energy_length];
+    for (int i = 0; i < energy_length; i++){
+        U_kin[i] = 0;
+        U_pot[i] = 0;
+    }
+
+    printf("Total number of time steps: %d\n", n_timesteps);
+    velocity_verlet(n_timesteps, N_PARTICLES, v, q, dt, m, kappa, alpha, U_kin, U_pot, save_every);
+
     write_energy_file(U_kin, U_pot, timesteps, n_timesteps, save_every);
 
     transform_to_normal_modes(trans_matrix, N_PARTICLES, v, P);
@@ -112,10 +106,10 @@ int main(){
     for (int i = 0; i < N_PARTICLES; i++){
         E_mode[i] = (1.0/2.0)*(pow(P[i],2)+pow(Q[i]*w[i],2));
         E_tot += E_mode[i];
-        printf("Mode number %d has energy %.20f\n", i, E_mode[i]);
-    }    
-    printf("Total energy is %.20f\n", E_tot);
+        printf("Mode number %d has energy %.10f\n", i, E_mode[i]);
+    }
 
+    printf("Total energy is %.10f\n", E_tot);
     return 0;
 }
 
@@ -238,7 +232,7 @@ void velocity_verlet(int n_timesteps, int n_particles,
 
         if (i%save_every == 0){
             printf("Saving timestep: %d\n", i);
-            
+            printf("%d", count); 
             /*U_kin(t+dt) */
             for (int j = 0; j < n_particles; j++) {
                 U_kin[count] += m[j]*pow(v[j], 2)/2.0;
