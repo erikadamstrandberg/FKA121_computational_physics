@@ -18,10 +18,10 @@ LIBS = \
 
 # Standard run for make
 CFLAGS = \
-		 -O3 \
-		 -Wall \
-		 -Werror \
-		 -pedantic
+		 -O1 
+		 #-Wall \ 
+		 #-Werror \
+		 #-pedantic
 # I consider to include these flags to be good practice  
 
 # Flags usedfor address-sanitizing debugging
@@ -54,6 +54,16 @@ all: $(MAIN)
 $(PROGRAM): $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
+
+# Debugging
+# Adress sanitizing
+address: clean
+	$(CC) $(CFLAGS_ADDRESS) $(MAIN).c -o $@ $(LIBS)
+
+# Memory sanitizing
+memory: clean
+	$(CC) $(CFLAGS_MEMORY) $(MAIN).c -o $@ $(LIBS)
+
 # Light clean.
 # Removes executable and objective files
 clean:
@@ -69,14 +79,4 @@ pushclean:
 	rm -rf *.csv
 	rm -rf *.pdf
 	touch *.c
-
-
-# Debugging
-# Adress sanitizing
-address: clean
-	$(CC) $(CFLAGS_ADDRESS) $(MAIN).c -o $@ $(LIBS)
-
-# Memory sanitizing
-memory: clean
-	$(CC) $(CFLAGS_MEMORY) $(MAIN).c -o $@ $(LIBS)
 

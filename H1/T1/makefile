@@ -17,5 +17,14 @@ $(PROGRAM): $(OBJECTS)
 
 clean:
 	rm -f *.o
+	rm $(PROGRAM)
 	touch *.c
+
+pushclean:
+	rm -f *.o
+	rm $(PROGRAM)
+	rm -rf *.csv
+	rm -rf *.pdf
+	touch *.c
+
 
