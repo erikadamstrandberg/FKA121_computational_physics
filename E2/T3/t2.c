@@ -199,7 +199,6 @@ void velocity_verlet(int n_timesteps, int n_particles,
         for (int j = 0; j < n_particles; j++) {
             v[j] += dt * 0.5 * a[j];
         }
-    
 
         if (i%save_every == 0){
             printf("Saving timestep: %d\n", i);

@@ -29,7 +29,7 @@ int main(){
     double dt = 0.0001;
     int n_timesteps = T/dt;
     printf("number of timesteps: %d\n", n_timesteps);
-    double m_al = 13.0/9649.0;
+    double m_al = 26.0/9649.0;
     double a0 = 4.05;  
     int N = 4;
     int n_atoms = 4*N*N*N;
