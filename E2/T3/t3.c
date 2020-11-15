@@ -18,7 +18,7 @@
 
 // Prototypes
 void write_energy_ord_file(double *U_kin, double *U_pot, 
-        double *timesteps, int n_timesteps, int save_every);
+        double *timesteps, int n_timesteps, int energy_length);
 
 void write_energy_norm_file(double E_mode[][N_PARTICLES], int energy_length);
 
@@ -55,11 +55,11 @@ int main(){
     double E0    = 32.0;
 
     // Simulation values
-    double total_time = 25000;
+    double total_time = 1e6;
     double dt         = 0.1;
     
     // How many timesteps to save
-    int save_every    = 100;
+    int save_every = 1e3;
 
     int n_timesteps = total_time/dt;
     int energy_length = n_timesteps/save_every;
@@ -72,13 +72,12 @@ int main(){
     }
     P[0] = sqrt(2.0*E0);
 
-
     transform_to_normal_modes(trans_matrix, N_PARTICLES, P, v);
     transform_to_normal_modes(trans_matrix, N_PARTICLES, Q, q);
 
-    double timesteps[n_timesteps];
-    for (int i = 0; i < n_timesteps; i++) {
-        timesteps[i] = i*dt;
+    double timesteps[energy_length];
+    for (int i = 0; i < energy_length; i++) {
+        timesteps[i] = i*dt*save_every;
     }
  
     double U_kin[energy_length];
@@ -105,12 +104,7 @@ int main(){
 
 
     // After evolving system. 
-    write_energy_ord_file(U_kin, U_pot, timesteps, n_timesteps, save_every);
-
-    transform_to_normal_modes(trans_matrix, N_PARTICLES, v, P);
-    transform_to_normal_modes(trans_matrix, N_PARTICLES, q, Q);
-    
-
+    write_energy_ord_file(U_kin, U_pot, timesteps, n_timesteps, energy_length);
     write_energy_norm_file(E_mode, energy_length);
     return 0;
 }
@@ -133,16 +127,12 @@ void write_energy_norm_file(double E_mode[][N_PARTICLES], int energy_length){
 
 
 void write_energy_ord_file(double *U_kin, double *U_pot, 
-                   double *timesteps, int n_timesteps, int save_every){
+                   double *timesteps, int n_timesteps, int energy_length){
     FILE *fp = fopen("energy_ord.csv", "w");
     fprintf(fp, "U_kin,U_pot,time\n");
 
-    int count = 0;
-    for(int i = 0; i < n_timesteps; ++i){
-        if (i%save_every == 0){
-	        fprintf(fp, "%f,%f,%f\n", U_kin[count], U_pot[count], timesteps[i]);
-            count += 1;
-        }
+    for(int i = 0; i < energy_length; ++i){
+        fprintf(fp, "%f,%f,%f\n", U_kin[i], U_pot[i], timesteps[i]);
     }
     fclose(fp);
 }
@@ -200,7 +190,7 @@ void velocity_verlet(int n_timesteps, int n_particles,
             v[j] += dt * 0.5 * a[j];
         }
 
-        if (i%save_every == 0){
+        if (i%save_every == 0 && i != n_timesteps){
             printf("Saving timestep: %d\n", i);
             /*U_kin(t+dt) */
             for (int j = 0; j < n_particles; j++) {

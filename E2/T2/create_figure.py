@@ -21,11 +21,10 @@ ax.plot(time, U_kin)
 ax.plot(time, U_pot)
 ax.plot(time, U_tot)
 
-ax.set_xlabel('time (arb.unit)')
-ax.set_ylabel('signal (arb.unit)')
+ax.set_title(r'Conservation of energy, $\alpha=0.01$', fontsize='20')
+ax.set_xlabel(r'Time', fontsize='16')
+ax.set_ylabel(r'Energy', fontsize='16')
 ax.grid()
-
-ax.set_xlim([0, 200])
 
 #%%
 
@@ -39,9 +38,19 @@ timesteps = len(mode_energy[0,:])
 
 fig, ax = plt.subplots()
 
-for i in range(timesteps):    
-    ax.plot(time, mode_energy[:, i])
+ax.plot(time, mode_energy[:, 0], color='black', linewidth=3, label=r'$E_1(t)$')
+ax.plot(time, mode_energy[:, 1], label=r'$E_2(t)$',linewidth=10)
+ax.plot(time, mode_energy[:, 2], label=r'$E_3(t)$',linewidth=5)
+ax.plot(time, mode_energy[:, 3], label=r'$E_4(t)$',linewidth=2)
+ax.plot(time, mode_energy[:, 4], label=r'$E_5(t)$',linewidth=0.5)
 
-ax.set_xlabel('time (arb.unit)')
-ax.set_ylabel('signal (arb.unit)')  
+ax.set_xlabel('Energy (arb.unit)')
+ax.set_ylabel('Time (arb.unit)')  
 ax.grid()
+ax.legend(fontsize=16)
+
+plt.savefig('mode_ortogonality.pdf', format='pdf', bbox_inches='tight')
+
+#%%
+
+

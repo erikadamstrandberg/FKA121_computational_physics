@@ -55,11 +55,11 @@ int main(){
     double E0    = 32.0;
 
     // Simulation values
-    double total_time = 25;
+    double total_time = 25000;
     double dt         = 0.1;
     
     // How many timesteps to save
-    int save_every    = 1;
+    int save_every    = 1000;
 
     int n_timesteps = total_time/dt;
     int energy_length = n_timesteps/save_every;
@@ -102,9 +102,6 @@ int main(){
     printf("Total number of time steps: %d\n", n_timesteps);
     velocity_verlet(n_timesteps, N_PARTICLES, v, q, P, Q, w, dt, m, kappa, alpha, U_kin, U_pot, E_mode, trans_matrix, energy_length, save_every);
 
-    for (int i = 0; i < energy_length; i++){
-        printf("%f", timesteps[i]);
-    }
     // After evolving system. 
     write_energy_ord_file(U_kin, U_pot, timesteps, energy_length);
     write_energy_norm_file(E_mode, energy_length);
@@ -194,7 +191,7 @@ void velocity_verlet(int n_timesteps, int n_particles,
         }
     
 
-        if (i%save_every == 0){
+        if (i%save_every == 0 && i != n_timesteps){
             printf("Saving timestep: %d\n", i);
             /*U_kin(t+dt) */
             for (int j = 0; j < n_particles; j++) {
