@@ -15,35 +15,28 @@
 /* Main program */
 int main()
 {
-    
-    /*
-     Code for generating a uniform random number between 0 and 1. srand should only
-     be called once.
-    */
-    /*
-     srand(time(NULL));
-     double random_value;
-     random_value = (double) rand() / (double) RAND_MAX;
-    */
-    
-    /*
-     Descriptions of the different functions in the files H1lattice.c and
-     H1potential.c are listed below.
-    */
-    
-    /* 
-     Function that generates a fcc lattice in units of [Å]. Nc is the number of 
-     primitive cells in each direction and a0 is the lattice parameter. The
-     positions of all the atoms are stored in pos which should be a matrix of the
-     size N x 3, where N is the number of atoms. The first, second and third column
-     correspond to the x,y and z coordinate respectively.
-    */
+    int ndim = 3;
     double a0 = 4.05;  
     int N = 4;
     int n_atoms = 4*N*N*N;
+    double pos[n_atoms][ndim];
+    double rand_interval = 0.065*a0;
 
-    double pos[n_atoms][3];
     init_fcc(pos, N, a0);
+
+    srand(time(NULL));
+    double random_value;
+    double random_disp;
+
+    for(int i = 0; i < n_atoms; i++){
+        for(int j = 0; j < ndim; j++){
+            random_value = (double) rand() / (double) RAND_MAX;
+            random_disp = random_value*2*rand_interval-rand_interval;
+            pos[i][j] += random_disp;
+            printf("%f\n", pos[i][j]);
+        }
+    }
+    
     
     /*
     for(int i = 0; i < n_atoms; i++){
@@ -61,7 +54,6 @@ int main()
      energy = get_energy_AL(pos, L, n_atoms);
     
      printf("%f\n", energy);
-    
     /* 
      Function that calculates the virial in units of [eV]. pos should be a matrix
      containing the positions of all the atoms, L is the length of the supercell 
