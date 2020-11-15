@@ -11,33 +11,21 @@
 #include "H1lattice.h"
 #include "H1potential.h"
 
+#define NDIM 3
+
+void random_displacement(double pos[][NDIM], int n_atoms, double interval);
 
 /* Main program */
 int main()
 {
-    int ndim = 3;
     double a0 = 4.05;  
     int N = 4;
     int n_atoms = 4*N*N*N;
-    double pos[n_atoms][ndim];
+    double pos[n_atoms][NDIM];
     double rand_interval = 0.065*a0;
 
     init_fcc(pos, N, a0);
-
-    srand(time(NULL));
-    double random_value;
-    double random_disp;
-
-    for(int i = 0; i < n_atoms; i++){
-        for(int j = 0; j < ndim; j++){
-            random_value = (double) rand() / (double) RAND_MAX;
-            random_disp = random_value*2*rand_interval-rand_interval;
-            pos[i][j] += random_disp;
-            printf("%f\n", pos[i][j]);
-        }
-    }
-    
-    
+    random_displacement(pos, n_atoms, rand_interval);
     /*
     for(int i = 0; i < n_atoms; i++){
         printf("%f\n", pos[i][0]);
@@ -77,4 +65,18 @@ int main()
     
     
     
+}
+
+void random_displacement(double pos[][NDIM], int n_atoms, double interval){
+    srand(time(NULL));
+    double random_value;
+    double random_disp;
+
+    for(int i = 0; i < n_atoms; i++){
+        for(int j = 0; j < NDIM; j++){
+            random_value = (double) rand() / (double) RAND_MAX;
+            random_disp = random_value*2*interval-interval;
+            pos[i][j] += random_disp;
+        }
+    }
 }
