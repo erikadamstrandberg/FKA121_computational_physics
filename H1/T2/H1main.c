@@ -25,23 +25,31 @@ double get_kinetic_energy(double v[][NDIM], int n_atoms, double m);
 
 /* Main program */
 int main(){
-    double T = 0.001;
+    double T = 1;
     double dt = 0.0001;
     int n_timesteps = T/dt;
     printf("number of timesteps: %d\n", n_timesteps);
     double m_al = 26.0/9649.0;
-    double a0 = 4.05;  
+    double a0 = 4.03;  
     int N = 4;
     int n_atoms = 4*N*N*N;
     double pos[n_atoms][NDIM];
     double rand_interval = 0.065*a0;
 
+    int save_every = 10;
+    int length_saved = n_timesteps/save_every + 1;
+    double time[length_saved];
+
+    for(int t = 0; t < length_saved; t++){
+        time[t] = t*dt*save_every;
+    }
+
     init_fcc(pos, N, a0);
     random_displacement(pos, n_atoms, rand_interval);
 
     double L = N*a0;
-    double potential_energy[n_timesteps];
-    double kinetic_energy[n_timesteps];
+    double potential_energy[length_saved];
+    double kinetic_energy[length_saved];
     potential_energy[0] = get_energy_AL(pos, L, n_atoms);
     kinetic_energy[0] = 0;
 
@@ -68,17 +76,24 @@ int main(){
     }
 
     get_forces_AL(f,pos, L, n_atoms);
-    
-    for(int t = 1; t < n_timesteps+1; t++){
 
+    int count = 1;
+    for(int t = 1; t < n_timesteps; t++){
         verlet_timestep(pos, v, f, n_atoms, dt, m_al, L);
-
-        kinetic_energy[t] = get_kinetic_energy(v, n_atoms, m_al);
-        potential_energy[t] = get_energy_AL(pos, L, n_atoms);
-        printf("timestep: %d\t potential energy: %f\t kinetic energy: %f\n", 
-                t, potential_energy[t], kinetic_energy[t]);
+        if(t%save_every == 0){
+            printf("Saving timestep: %d\n", t);
+            kinetic_energy[count] = get_kinetic_energy(v, n_atoms, m_al);
+            potential_energy[count] = get_energy_AL(pos, L, n_atoms);
+            count += 1;
+        }
     }
 
+
+    FILE *fp = fopen("energy.csv", "w");
+    fprintf(fp, "kinetic_energy,potential_energy,time\n");
+    for(int t = 0; t < length_saved-1; t++){
+        fprintf(fp, "%f,%f,%f\n", kinetic_energy[t], potential_energy[t], time[t]);
+    }
 }
 
 void random_displacement(double pos[][NDIM], int n_atoms, double interval){
