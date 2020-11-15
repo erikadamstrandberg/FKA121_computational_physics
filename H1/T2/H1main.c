@@ -21,12 +21,14 @@ void verlet_timestep(double pos[][NDIM], double v[][NDIM], double f[][NDIM],
                      double m, 
                      double L);
 
+double get_kinetic_energy(double v[][NDIM], int n_atoms, double m);
+
 /* Main program */
 int main(){
     double T = 0.001;
     double dt = 0.0001;
     int n_timesteps = T/dt;
-    printf("numper of timesteps: %d\n", n_timesteps);
+    printf("number of timesteps: %d\n", n_timesteps);
     double m_al = 13.0/9649.0;
     double a0 = 4.05;  
     int N = 4;
@@ -38,10 +40,13 @@ int main(){
     random_displacement(pos, n_atoms, rand_interval);
 
     double L = N*a0;
-    double energy;
-    energy = get_energy_AL(pos, L, n_atoms);
-    
-    printf("potential energy: %f\n", energy);
+    double potential_energy[n_timesteps];
+    double kinetic_energy[n_timesteps];
+    potential_energy[0] = get_energy_AL(pos, L, n_atoms);
+    kinetic_energy[0] = 0;
+
+    printf("initial potential energy: %f\n", potential_energy[0]);
+    printf("initial kinetic energy: %f\n", kinetic_energy[0]);
 
     /* 
      Function that calculates the virial in units of [eV]. pos should be a matrix
@@ -53,13 +58,6 @@ int main(){
      virial = get_virial_AL(pos, L, N);
     */
     
-    /*
-     Function that calculates the forces on all atoms in units of [eV/Å]. the 
-     forces are stored in f which should be a matrix of size n_atoms x 3, where
-     column 1,2 and 3 correspond to the x,y and z component of
-     the force resepctively . pos should be a matrix containing the positions of 
-     all the atoms, L is the length of the supercell and N is the number of atoms.
-    */
     double f[n_atoms][NDIM];
     double v[n_atoms][NDIM]; 
     for(int i = 0; i < n_atoms; i++){
@@ -71,15 +69,16 @@ int main(){
 
     get_forces_AL(f,pos, L, n_atoms);
     
-    for(int t = 0; t < n_timesteps; t++){
+    for(int t = 1; t < n_timesteps+1; t++){
 
         verlet_timestep(pos, v, f, n_atoms, dt, m_al, L);
-       
-        energy = get_energy_AL(pos, L, n_atoms);
-        printf("timestep: %d\t potential energy: %f\n", t, energy);
+
+        kinetic_energy[t] = get_kinetic_energy(v, n_atoms, m_al);
+        potential_energy[t] = get_energy_AL(pos, L, n_atoms);
+        printf("timestep: %d\t potential energy: %f\t kinetic energy: %f\n", 
+                t, potential_energy[t], kinetic_energy[t]);
     }
 
-    
 }
 
 void random_displacement(double pos[][NDIM], int n_atoms, double interval){
@@ -116,4 +115,14 @@ void verlet_timestep(double pos[][NDIM], double v[][NDIM], double f[][NDIM],
             v[i][j] += dt*f[i][j]/(2.0*m);
         }
     }
+}
+
+double get_kinetic_energy(double v[][NDIM], int n_atoms, double m){
+    double energy = 0.0;
+    for(int i = 0; i < n_atoms; i++){
+        for(int j = 0; j < NDIM; j++){
+            energy += m*pow(v[i][j],2)/2.0;
+        }
+    }  
+    return energy;
 }
