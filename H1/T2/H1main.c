@@ -4,15 +4,21 @@
  Created by Anders Lindman on 2013-10-31.
  */
 
+// Includes from C lib
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <gsl/gsl_const_mksa.h>
+
+// Our own headers
 #include "H1lattice.h"
 #include "H1potential.h"
 #include "write_to_file.h"
 
 #define NDIM 3
+#define KB GSL_CONST_MKSA_BOLTZMANN
+#define EV GSL_CONST_MKSA_ELECTRON_CHARGE
 
 void random_displacement(double pos[][NDIM], int n_atoms, double interval);
 
@@ -26,11 +32,12 @@ double get_kinetic_energy(double v[][NDIM], int n_atoms, double m);
 
 void write_energy(double *kinetic_energy, double *potential_energy, double *time, int length_saved);
 
+
 /* Main program */
 int main(){
     // Initializing 
     // Time
-    double T = 100;
+    double T = 1;
     double dt = 0.001;
     int n_timesteps = T/dt;
 
@@ -51,6 +58,7 @@ int main(){
     double pos[n_atoms][NDIM];
     double rand_interval = 0.065*a0; // Random displacement interval
     double L = N*a0;                 // Total length of simulated cube
+    double V = pow(L, 3);            // Volume of simulated cube
     init_fcc(pos, N, a0);            // Creating pos
     random_displacement(pos, n_atoms, rand_interval); 
 
@@ -59,8 +67,11 @@ int main(){
     // Energy
     double potential_energy[length_saved];
     double kinetic_energy[length_saved];
+    double virial[length_saved];
+
     potential_energy[0] = get_energy_AL(pos, L, n_atoms);
     kinetic_energy[0] = 0;
+    virial[0] = get_virial_AL(pos, L, n_atoms);
 
     // Forces and velocity for verlet
     double f[n_atoms][NDIM];
@@ -80,28 +91,40 @@ int main(){
     // Verlet evolving the system
     get_forces_AL(f,pos, L, n_atoms);
     int count = 1;
-    for(int t = 1; t < n_timesteps; t++){
+    for(int t = 1; t < n_timesteps + 1; t++){
         verlet_timestep(pos, v, f, n_atoms, dt, m_al, L);
         if(t%save_every == 0){
             printf("Saving timestep: %d\n", t);
             kinetic_energy[count] = get_kinetic_energy(v, n_atoms, m_al);
             potential_energy[count] = get_energy_AL(pos, L, n_atoms);
+            virial[count] = get_virial_AL(pos, L, n_atoms);
             count += 1;
         }
     }
 
-    write_energy(kinetic_energy, potential_energy, time, length_saved); 
-    print_pos(pos, n_atoms, "after_verlet");
-    /*
-     Function that calculates the virial in units of [eV]. pos should be a matrix
-     containing the positions of all the atoms, L is the length of the supercell 
-     and N is the number of atoms.
-    */
-    /*
-     double virial;
-     virial = get_virial_AL(pos, L, N);
-    */
+
     
+    double kinetic_time_average = 0.0;
+    double virial_time_average = 0.0;
+
+    for (int i = 0; i < length_saved; i++){
+        kinetic_time_average += kinetic_energy[i];
+        virial_time_average += virial[i];
+    }
+
+    kinetic_time_average = kinetic_time_average/length_saved; 
+    virial_time_average = virial_time_average/length_saved;
+
+    double kT = (2.0/(3.0*n_atoms))*kinetic_time_average;
+    double temperature = kT*EV/KB;
+
+    double V_si = V*1e-30;
+    double pressure = (1/V_si)*(N*kT + virial_time_average)*EV;
+
+
+    write_energy(kinetic_energy, potential_energy, time, length_saved); 
+    write_temp_pressure(temperature, pressure, "temp_and_pressure");
+    print_pos(pos, n_atoms, "pos_after_verlet");
 }
 
 void random_displacement(double pos[][NDIM], int n_atoms, double interval){
@@ -154,7 +177,7 @@ double get_kinetic_energy(double v[][NDIM], int n_atoms, double m){
 void write_energy(double *kinetic_energy, double *potential_energy, double *time, int length_saved){
     FILE *fp = fopen("energy.csv", "w");
     fprintf(fp, "kinetic_energy,potential_energy,time\n");
-    for(int t = 0; t < length_saved-1; t++){
+    for(int t = 0; t < length_saved; t++){
         fprintf(fp, "%f,%f,%f\n", kinetic_energy[t], potential_energy[t], time[t]);
     }
 }

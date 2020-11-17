@@ -26,3 +26,16 @@ void print_pos(double pos[][NDIM], int n_atoms, char *filename){
     free(filename_csv);
 }
 
+void write_temp_pressure(double temperature, double pressure, char *filename){
+    int length_filename = strlen(filename);
+    char *filename_csv = malloc((length_filename + 4)*sizeof(char));
+    strcpy(filename_csv, filename);
+    strcat(filename_csv, ".csv");
+
+    FILE *ftemp_press = fopen(filename_csv, "w");
+    fprintf(ftemp_press, "temp[K],pressure[Pa]\n");
+    fprintf(ftemp_press, "%f,%f", temperature, pressure);
+    fclose(ftemp_press);
+    free(filename_csv);
+}
+

@@ -17,7 +17,7 @@ fig, ax = plt.subplots()
 ax.plot(a**3, E_pot, 'x', color='black', label=r'$E_{sim}$')
 ax.plot(a_fit**3, E_pot_fit, color='red', linewidth='0.8', label=r'$E_{fit}$')
 
-ax.set_title(r'$E_{pot}$ ', fontsize='22')
+ax.set_title(r'$E_{pot}$ ', fontsize='16')
 ax.set_xlabel(r'$V_{cell}$ [$Å^3$]', fontsize='16')
 ax.set_ylabel(r'$E$ [$eV/unit\ cell$]', fontsize='16')
 ax.grid()
