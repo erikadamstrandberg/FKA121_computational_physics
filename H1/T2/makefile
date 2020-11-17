@@ -3,8 +3,8 @@ CC = gcc
 CFLAGS = -O3 -Wall
 LIBS = -lm
 
-HEADERS = H1lattice.h H1potential.h
-OBJECTS = H1lattice.o H1potential.o H1main.o
+HEADERS = H1lattice.h H1potential.h write_to_file.h
+OBJECTS = H1lattice.o H1potential.o write_to_file.o H1main.o
 PROGRAM = MD
 
 %.o: %.c $(HEADERS)

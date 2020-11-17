@@ -29,3 +29,13 @@ min_a = a_fit[index_min]
 plt.savefig('lattice_constant.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
+#%%
+
+array = array = np.genfromtxt('initial_AL.csv', delimiter=',', skip_header=1)
+x = array[:,0]
+y = array[:,1]
+z = array[:,2]
+
+ax = plt.axes(projection='3d')
+ax.scatter3D(x, y, z, color='black')
+

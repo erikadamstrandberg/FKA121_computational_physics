@@ -8,8 +8,12 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+
 #include "H1lattice.h"
 #include "H1potential.h"
+#include "write_to_file.h"
+
+#define NDIM 3
 
 
 /* Main program */
@@ -18,7 +22,6 @@ int main(){
     int N = 4;
     int unit_cell = N*N*N;
     int n_atoms = 4*unit_cell;
-    int ndim = 3;
 
     double a0_start = cbrt(64);
     double a0_stop  = cbrt(68);
@@ -28,7 +31,7 @@ int main(){
     double a0[n_a0];
     double energy[n_a0];
     double L;
-    double pos[n_atoms][ndim];
+    double pos[n_atoms][NDIM];
 
     for (int i = 0; i < n_a0; i++){
         a0[i] = a0_start + i*lattice_step;
@@ -44,4 +47,6 @@ int main(){
 	    fprintf(fp, "%f,%f\n", a0[i], energy[i]); 
     }
     fclose(fp);
+
+    print_pos(pos, n_atoms, "initial_AL");
 }

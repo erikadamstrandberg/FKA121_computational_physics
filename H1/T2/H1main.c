@@ -10,6 +10,7 @@
 #include <time.h>
 #include "H1lattice.h"
 #include "H1potential.h"
+#include "write_to_file.h"
 
 #define NDIM 3
 
@@ -23,18 +24,15 @@ void verlet_timestep(double pos[][NDIM], double v[][NDIM], double f[][NDIM],
 
 double get_kinetic_energy(double v[][NDIM], int n_atoms, double m);
 
+void write_energy(double *kinetic_energy, double *potential_energy, double *time, int length_saved);
+
 /* Main program */
 int main(){
-    double T = 1;
-    double dt = 0.0001;
+    // Initializing 
+    // Time
+    double T = 100;
+    double dt = 0.001;
     int n_timesteps = T/dt;
-    printf("number of timesteps: %d\n", n_timesteps);
-    double m_al = 26.0/9649.0;
-    double a0 = 4.03;  
-    int N = 4;
-    int n_atoms = 4*N*N*N;
-    double pos[n_atoms][NDIM];
-    double rand_interval = 0.065*a0;
 
     int save_every = 10;
     int length_saved = n_timesteps/save_every + 1;
@@ -44,28 +42,27 @@ int main(){
         time[t] = t*dt*save_every;
     }
 
-    init_fcc(pos, N, a0);
-    random_displacement(pos, n_atoms, rand_interval);
+    // Aluminium constants 
+    double m_al = 26.0/9649.0;       // Weight 26u 
+    double a0 = 4.03;                // Equilbrium constant
+    int N = 4;                       // Unit cells
+    int n_atoms = 4*N*N*N;              
 
-    double L = N*a0;
+    double pos[n_atoms][NDIM];
+    double rand_interval = 0.065*a0; // Random displacement interval
+    double L = N*a0;                 // Total length of simulated cube
+    init_fcc(pos, N, a0);            // Creating pos
+    random_displacement(pos, n_atoms, rand_interval); 
+
+    print_pos(pos, n_atoms, "initial_random_displacement");
+
+    // Energy
     double potential_energy[length_saved];
     double kinetic_energy[length_saved];
     potential_energy[0] = get_energy_AL(pos, L, n_atoms);
     kinetic_energy[0] = 0;
 
-    printf("initial potential energy: %f\n", potential_energy[0]);
-    printf("initial kinetic energy: %f\n", kinetic_energy[0]);
-
-    /* 
-     Function that calculates the virial in units of [eV]. pos should be a matrix
-     containing the positions of all the atoms, L is the length of the supercell 
-     and N is the number of atoms.
-    */
-    /*
-     double virial;
-     virial = get_virial_AL(pos, L, N);
-    */
-    
+    // Forces and velocity for verlet
     double f[n_atoms][NDIM];
     double v[n_atoms][NDIM]; 
     for(int i = 0; i < n_atoms; i++){
@@ -75,8 +72,13 @@ int main(){
         }
     }
 
-    get_forces_AL(f,pos, L, n_atoms);
+    // Print information before Verlet
+    printf("number of timesteps: %d\n", n_timesteps);
+    printf("initial potential energy: %f\n", potential_energy[0]);
+    printf("initial kinetic energy: %f\n", kinetic_energy[0]);
 
+    // Verlet evolving the system
+    get_forces_AL(f,pos, L, n_atoms);
     int count = 1;
     for(int t = 1; t < n_timesteps; t++){
         verlet_timestep(pos, v, f, n_atoms, dt, m_al, L);
@@ -88,12 +90,18 @@ int main(){
         }
     }
 
-
-    FILE *fp = fopen("energy.csv", "w");
-    fprintf(fp, "kinetic_energy,potential_energy,time\n");
-    for(int t = 0; t < length_saved-1; t++){
-        fprintf(fp, "%f,%f,%f\n", kinetic_energy[t], potential_energy[t], time[t]);
-    }
+    write_energy(kinetic_energy, potential_energy, time, length_saved); 
+    print_pos(pos, n_atoms, "after_verlet");
+    /*
+     Function that calculates the virial in units of [eV]. pos should be a matrix
+     containing the positions of all the atoms, L is the length of the supercell 
+     and N is the number of atoms.
+    */
+    /*
+     double virial;
+     virial = get_virial_AL(pos, L, N);
+    */
+    
 }
 
 void random_displacement(double pos[][NDIM], int n_atoms, double interval){
@@ -140,4 +148,13 @@ double get_kinetic_energy(double v[][NDIM], int n_atoms, double m){
         }
     }  
     return energy;
+}
+
+
+void write_energy(double *kinetic_energy, double *potential_energy, double *time, int length_saved){
+    FILE *fp = fopen("energy.csv", "w");
+    fprintf(fp, "kinetic_energy,potential_energy,time\n");
+    for(int t = 0; t < length_saved-1; t++){
+        fprintf(fp, "%f,%f,%f\n", kinetic_energy[t], potential_energy[t], time[t]);
+    }
 }
