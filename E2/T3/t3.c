@@ -51,7 +51,7 @@ int main(){
     construct_transformation_matrix(trans_matrix, N_PARTICLES);
      
     double kappa = 1.0;
-    double alpha = 0.01;
+    double alpha = 0.1;
     double E0    = 32.0;
 
     // Simulation values
@@ -59,7 +59,7 @@ int main(){
     double dt         = 0.1;
     
     // How many timesteps to save
-    int save_every = 1e3;
+    int save_every = 1e4;
 
     int n_timesteps = total_time/dt;
     int energy_length = n_timesteps/save_every;
