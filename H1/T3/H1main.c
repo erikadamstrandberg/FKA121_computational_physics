@@ -37,8 +37,8 @@ void write_energy(double *kinetic_energy, double *potential_energy, double *time
 int main(){
     // Initializing 
     // Time
-    double T    = 10;
-    double dt   = 0.004;
+    double T    = 5;
+    double dt   = 0.001;
     int n_timesteps = T/dt;
 
     int save_every = 1;
@@ -111,12 +111,11 @@ int main(){
     double T_equil = 500.0;
     double tau_t   = 5e-3;
     double alpha_t = 0.0;
-
     // Values for pressure equilibration
-    double P_equil      = 1;
+    double P_equil      = 101e-6;
     double bulk_modulus = 62.0;
     double kappa_p      = 1/(bulk_modulus);
-    double tau_p        = 1e9;
+    double tau_p        = 4e-2;
     double alpha_p      = 0.0;
 
 
@@ -144,7 +143,7 @@ int main(){
 
             
             temperature[count] = (2.0/(3.0*n_atoms))*kinetic_time_average[count]*EV/KB; 
-            pressure[count] = (1.0/V_si)*(n_atoms*KB*temperature[count] + virial_time_average[count]*EV);
+            pressure[count] = (1.0/V_si)*(n_atoms*KB*temperature[count] + virial_time_average[count]*EV)*1e-9;
             
             count += 1;
 
@@ -153,8 +152,7 @@ int main(){
         if(t > timestep_equil){
             alpha_t = 1.0 + (2.0*dt/tau_t)*((T_equil - temperature[t])/temperature[t]);
             alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
-            //printf("%f", pressure[t]);
-            printf("%f, %f, %f, %f", kappa_p*(dt/tau_p), alpha_p, P_equil, pressure[t]);
+            printf("%f, %f, ", alpha_p, pressure[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
                     pos[i][j] = cbrt(alpha_p)*pos[i][j];
@@ -162,7 +160,6 @@ int main(){
                 }
             } 
         }
-            
     }
 
     write_energy(kinetic_energy, potential_energy, time, length_saved); 
