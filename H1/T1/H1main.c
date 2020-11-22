@@ -38,8 +38,8 @@ int main(){
         L = N*a0[i];
         init_fcc(pos, N, a0[i]);
         energy[i] = get_energy_AL(pos, L, n_atoms)/unit_cell;
-    } 
-    
+    }
+
     FILE *fp = fopen("lattice_pot_energy.csv", "w");
     fprintf(fp, "lattice_const,E_pot\n");
 

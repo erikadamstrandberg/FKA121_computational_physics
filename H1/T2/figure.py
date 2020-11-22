@@ -79,3 +79,10 @@ plt.show()
 
 #%%
 
+array = array = np.genfromtxt('pos_after_verlet.csv', delimiter=',', skip_header=1)
+x = array[:,0]
+y = array[:,1]
+z = array[:,2]
+
+ax = plt.axes(projection='3d')
+ax.scatter3D(x, y, z, color='black')
