@@ -76,3 +76,6 @@ ax.legend(fontsize='16')
 plt.savefig('figure/energy_dt_20fs.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
+
+#%%
+

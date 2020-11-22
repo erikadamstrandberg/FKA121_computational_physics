@@ -37,8 +37,8 @@ void write_energy(double *kinetic_energy, double *potential_energy, double *time
 int main(){
     // Initializing 
     // Time
-    double T    = 5;
-    double dt   = 0.001;
+    double T    = 10;
+    double dt   = 1e-4;
     int n_timesteps = T/dt;
 
     int save_every = 1;
@@ -59,7 +59,7 @@ int main(){
     double rand_interval = 0.065*a0; // Random displacement interval
     double L = N*a0;                 // Total length of simulated cube
     double V = pow(L, 3);            // Volume of simulated cube
-    double V_si = V*1e-30;           // In SI-units for pressure calculation
+    double V_real = V*1e-30;           // In SI-units for pressure calculation
 
     init_fcc(pos, N, a0);            // Creating pos
     random_displacement(pos, n_atoms, rand_interval); 
@@ -109,13 +109,14 @@ int main(){
     
     // Values for temp equilibration
     double T_equil = 500.0;
-    double tau_t   = 5e-3;
+    double tau_t   = 200.0*dt;
     double alpha_t = 0.0;
+
     // Values for pressure equilibration
     double P_equil      = 101e-6;
     double bulk_modulus = 62.0;
-    double kappa_p      = 1/(bulk_modulus);
-    double tau_p        = 4e-2;
+    double kappa_p      = 1.0/(bulk_modulus);
+    double tau_p        = 100*dt;//100e-3;
     double alpha_p      = 0.0;
 
 
@@ -142,8 +143,8 @@ int main(){
             virial_time_average[count] = virial_time_average[count]/count;
 
             
-            temperature[count] = (2.0/(3.0*n_atoms))*kinetic_time_average[count]*EV/KB; 
-            pressure[count] = (1.0/V_si)*(n_atoms*KB*temperature[count] + virial_time_average[count]*EV)*1e-9;
+            temperature[count] = (2.0/(3.0*n_atoms))*kinetic_energy[count]*EV/KB; //(2.0/(3.0*n_atoms))*kinetic_time_average[count]*EV/KB; 
+            pressure[count] =  (1.0/V_real)*(n_atoms*KB*temperature[count] + virial[count]*EV)*1e-9;//(1.0/V_si)*(n_atoms*KB*temperature[count] + virial_time_average[count]*EV)*1e-9;
             
             count += 1;
 
@@ -159,6 +160,7 @@ int main(){
                     v[i][j] = sqrt(alpha_t)*v[i][j];
                 }
             } 
+            V_real = alpha_p*V_real;
         }
     }
 
