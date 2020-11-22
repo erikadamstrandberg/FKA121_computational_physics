@@ -51,7 +51,7 @@ int main(){
 
     // Aluminium constants 
     double m_al     = 26.0/9649.0;       // Weight 26u 
-    double a0       = 4.03;              // Equilbrium constant
+    double a0       = 4.03;              // gitter constant at 0 K
     int N           = 4;                 // Unit cells
     int n_atoms     = 4*N*N*N;              
 
