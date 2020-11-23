@@ -17,8 +17,9 @@
 #include "write_to_file.h"
 
 #define NDIM 3
-#define KB GSL_CONST_MKSA_BOLTZMANN
+#define KB 8.617e-5
 #define EV GSL_CONST_MKSA_ELECTRON_CHARGE
+#define TO_GPA 160.2176
 
 void random_displacement(double pos[][NDIM], int n_atoms, double interval);
 
@@ -37,7 +38,7 @@ void write_energy(double *kinetic_energy, double *potential_energy, double *time
 int main(){
     // Initializing 
     // Time
-    double T    = 120;
+    double T    = 6;
     double dt   = 1e-3;
     int n_timesteps = T/dt;
 
@@ -58,13 +59,12 @@ int main(){
     double pos[n_atoms][NDIM];
     double rand_interval = 0.065*a0; // Random displacement interval
     double L = N*a0;                 // Total length of simulated cube
-    double V = pow(L, 3);            // Volume of simulated cube
-    double V_real = V*1e-30;           // In SI-units for pressure calculation
+    double V[length_saved]; 
+    V[0] = pow(L, 3);            // Volume of simulated cube
+    V[1] = pow(L, 3);
 
     init_fcc(pos, N, a0);            // Creating pos
     random_displacement(pos, n_atoms, rand_interval); 
-
-    print_pos(pos, n_atoms, "initial_random_displacement");
 
     // Energy
     double potential_energy[length_saved];
@@ -85,20 +85,18 @@ int main(){
         }
     }
 
-    double kinetic_time_average[length_saved];
-    double virial_time_average[length_saved];
-    for (int i = 0; i < length_saved; i++){
-        kinetic_time_average[i] = 0;
-        virial_time_average[i] = 0;
-    }
+//    double kinetic_time_average[length_saved];
+//    double virial_time_average[length_saved];
+//    for (int i = 0; i < length_saved; i++){
+//        kinetic_time_average[i] = 0;
+//        virial_time_average[i] = 0;
+//    }
     
     double temperature[length_saved];
     double pressure[length_saved];
     temperature[0] = 0;
-    pressure[0] = 0;            // THIS COULD BE WRONG
+    pressure[0] = 0;
     
-
-
     // Print information before Verlet
     printf("number of timesteps: %d\n", n_timesteps);
     printf("initial potential energy: %f\n", potential_energy[0]);
@@ -110,19 +108,17 @@ int main(){
     // Values for temp equilibration
     double T_equil = 500.0;
     double tau_t   = 200.0*dt;
-    double alpha_t = 0.0;
+    double alpha_t = 1.0;
 
     // Values for pressure equilibration
-    double P_equil      = 1.0e-4;
-    double bulk_modulus = 62.0;
-    double kappa_p      = 1.0/(bulk_modulus);
-    double tau_p        = 10.0*dt;//100e-3;
-    double alpha_p      = 0.0;
+    double P_equil      = 1e-4/TO_GPA;
+    double bulk_modulus = 62.0/TO_GPA;
+    double kappa_p      = 1.0/bulk_modulus;
+    double tau_p        = 400.0*dt;
+    double alpha_p      = 1.0;
 
-    double temp_difference = 0.0;
     // Verlet evolving the system
     get_forces_AL(f,pos, L, n_atoms);
-    int count = 1;
     for(int t = 1; t < n_timesteps + 1; t++){
         verlet_timestep(pos, v, f, n_atoms, dt, m_al, L);
 
@@ -132,39 +128,37 @@ int main(){
         potential_energy[t] = get_energy_AL(pos, L, n_atoms);
         virial[t] = get_virial_AL(pos, L, n_atoms);
 
-        temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]*EV/KB; 
-        pressure[t] =  (1.0/V_real)*(n_atoms*KB*temperature[t] + virial[t]*EV)*1e-9;
-            
+        temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
+        pressure[t] =  (1.0/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
+
         if(t > timestep_equil){ 
-            temp_difference = T_equil - temperature[t];
-            alpha_t = 1.0 + (2.0*dt/tau_t)*(temp_difference/temperature[t]);
+            alpha_t = 1.0 + (2.0*dt/tau_t)*((T_equil - temperature[t])/temperature[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
                     v[i][j] = sqrt(alpha_t)*v[i][j];
                 }
             }
 
-            if(t > timestep_equil*2.0) {
-                kinetic_energy[t] = get_kinetic_energy(v, n_atoms, m_al);
-                temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]*EV/KB; 
-                pressure[t] =  (1.0/V_real)*(n_atoms*KB*temperature[t] + virial[t]*EV)*1e-9;
-            
-                alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
-                for(int i = 0; i < n_atoms; i++){
-                    for(int j = 0; j < NDIM; j++){
-                        pos[i][j] = cbrt(alpha_p)*pos[i][j];
-                    }
+            kinetic_energy[t] = get_kinetic_energy(v, n_atoms, m_al);
+            temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
+            pressure[t] =  (1.0/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
+        
+            alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
+            for(int i = 0; i < n_atoms; i++){
+                for(int j = 0; j < NDIM; j++){
+                    pos[i][j] = cbrt(alpha_p)*pos[i][j];
                 }
-
-                V_real = alpha_p*V_real;
             }
         }
+        V[t+1] = alpha_p*V[t];
+        L = cbrt(alpha_p)*L;
     }
 
-    write_energy(kinetic_energy, potential_energy, time, length_saved); 
-    write_temp_pressure(temperature, pressure, time, length_saved, "temp_and_pressure");
+    write_TPV(temperature, pressure, V, time, length_saved, "TPV");
     print_pos(pos, n_atoms, "pos_after_equil");
     print_pos(v, n_atoms, "v_after_equil");
+    
+    
 
 }
 

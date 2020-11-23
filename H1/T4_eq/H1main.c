@@ -18,7 +18,6 @@
 
 #define NDIM 3
 #define KB 8.617e-5
-#define EV GSL_CONST_MKSA_ELECTRON_CHARGE
 #define TO_GPA 160.2176
 
 void random_displacement(double pos[][NDIM], int n_atoms, double interval);
@@ -106,7 +105,7 @@ int main(){
     double timestep_equil = start_equil/dt;
     
     // Values for temp equilibration
-    double T_equil = 500.0;
+    double T_equil = 700.0;
     double tau_t   = 200.0*dt;
     double alpha_t = 1.0;
 

@@ -15,24 +15,26 @@
 
 #define NDIM 3
 
-
-/* Main program */
+// Main program
 int main(){
     
+    // Initilazing the supercell
     int N = 4;
     int unit_cell = N*N*N;
     int n_atoms = 4*unit_cell;
 
-    double a0_start = cbrt(64);
-    double a0_stop  = cbrt(68);
+    // Sweep of lattice constants
+    double a0_start = cbrt(64); // a0_start = 4 angstrom
+    double a0_stop  = cbrt(68); // a0_stop  = 4.08 angstrom
     double lattice_step = 0.005;
-    
     int n_a0 = (a0_stop - a0_start)/lattice_step;
+    
     double a0[n_a0];
     double energy[n_a0];
     double L;
     double pos[n_atoms][NDIM];
 
+    // Sweep for the potential energy 
     for (int i = 0; i < n_a0; i++){
         a0[i] = a0_start + i*lattice_step;
         L = N*a0[i];
@@ -40,6 +42,7 @@ int main(){
         energy[i] = get_energy_AL(pos, L, n_atoms)/unit_cell;
     }
 
+    // Write to file
     FILE *fp = fopen("lattice_pot_energy.csv", "w");
     fprintf(fp, "lattice_const,E_pot\n");
 
