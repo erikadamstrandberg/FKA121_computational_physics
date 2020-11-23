@@ -18,7 +18,6 @@
 
 #define NDIM 3
 #define KB 8.617e-5
-#define EV GSL_CONST_MKSA_ELECTRON_CHARGE
 #define TO_GPA 160.2176
 
 void random_displacement(double pos[][NDIM], int n_atoms, double interval);
@@ -97,11 +96,14 @@ int main(){
     temperature[0] = 0;
     pressure[0] = 0;
     
-    // Print information before Verlet
-    printf("number of timesteps: %d\n", n_timesteps);
-    printf("initial potential energy: %f\n", potential_energy[0]);
-    printf("initial kinetic energy: %f\n", kinetic_energy[0]);
+    // Save timetrail for 5 atoms
+    double q1[length_saved][NDIM];
+    double q2[length_saved][NDIM];
+    double q3[length_saved][NDIM];
+    double q4[length_saved][NDIM];
+    double q5[length_saved][NDIM];
 
+    // Equilibration
     double start_equil = 2; 
     double timestep_equil = start_equil/dt;
     
@@ -116,6 +118,17 @@ int main(){
     double kappa_p      = 1.0/bulk_modulus;
     double tau_p        = 400.0*dt;
     double alpha_p      = 1.0;
+    
+
+    // Print information before Verlet
+    printf("number of timesteps: %d\n", n_timesteps);
+    printf("initial potential energy: %f\n", potential_energy[0]);
+    printf("initial kinetic energy: %f\n", kinetic_energy[0]);
+
+    printf("number of timesteps: %d\n", n_timesteps);
+    printf("initial potential energy: %f\n", potential_energy[0]);
+    printf("initial kinetic energy: %f\n", kinetic_energy[0]);
+
 
     // Verlet evolving the system
     get_forces_AL(f,pos, L, n_atoms);
@@ -152,12 +165,38 @@ int main(){
         }
         V[t+1] = alpha_p*V[t];
         L = cbrt(alpha_p)*L;
+
+
+        for (int i = 0; i < NDIM; i++){
+            q1[t][i] = pos[0][i];
+            q2[t][i] = pos[1][i];
+            q3[t][i] = pos[2][i];
+            q4[t][i] = pos[3][i];
+            q5[t][i] = pos[4][i];
+        }
     }
 
     write_TPV(temperature, pressure, V, time, length_saved, "TPV");
     print_pos(pos, n_atoms, "pos_after_equil");
     print_pos(v, n_atoms, "v_after_equil");
     
+    FILE *ftrail = fopen("timetrails.csv", "w");
+    fprintf(ftrail, "x1,y1,z1,");
+    fprintf(ftrail, "x2,y2,z2,");
+    fprintf(ftrail, "x3,y3,z3,");
+    fprintf(ftrail, "x4,y4,z4,");
+    fprintf(ftrail, "x5,y5,z5\n");
+
+    for(int i = 0; i < length_saved; i++){
+        fprintf(ftrail, "%f,%f,%f,", q1[i][0], q1[i][1], q1[i][2]);
+        fprintf(ftrail, "%f,%f,%f,", q2[i][0], q2[i][1], q2[i][2]);
+        fprintf(ftrail, "%f,%f,%f,", q3[i][0], q3[i][1], q3[i][2]);
+        fprintf(ftrail, "%f,%f,%f,", q4[i][0], q4[i][1], q4[i][2]);
+        fprintf(ftrail, "%f,%f,%f\n", q5[i][0], q5[i][1], q5[i][2]);
+    }
+
+    fclose(ftrail);
+
     
 
 }
