@@ -30,14 +30,15 @@ void integrate(int N){
     printf("I = %f\n", 1.0/6.0);
     printf("I_N = %f\n", I);
     printf("sigma2 = %f\n", sigma2);
-    printf("sigma = %f\n", sqrt(sigma2)/sqrt(N));
+    printf("sigma = %f\n\n", sqrt(sigma2)/sqrt(N));
+    printf("I = %f +- %f\n\n", I, sqrt(sigma2)/sqrt(N));
 }
 
 // Main 
 int main(){
-    int N[] = {10, 100, 1000, 10000};
-
-    for(int i = 0; i < 4; i++){
+    int N[] = {10, 100, 1000, 10000, 1000000};
+    int number_of_N = 5;
+    for(int i = 0; i < number_of_N; i++){
         integrate(N[i]);
     }
 }

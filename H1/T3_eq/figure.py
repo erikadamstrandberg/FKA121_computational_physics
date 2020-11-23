@@ -7,7 +7,7 @@ N = 256
 
 #%%
 
-array = np.genfromtxt('TPV.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('data/TPV.csv', delimiter=',', skip_header=1)
 
 temp     = array[:, 0]
 pressure = array[:, 1]
@@ -68,8 +68,7 @@ ax.set_ylim([y_min, y_max])
 plt.savefig('figure/pressure_equil_T500.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
-#%%
-
+#%% Volume 
 
 fig, ax = plt.subplots()
 ax.plot(time, volume, color='black', label=r'$V(t)$')
@@ -83,4 +82,43 @@ ax.legend(fontsize='16')
 
 plt.savefig('figure/volume_equil_T500.pdf', format='pdf', bbox_inches='tight')
 plt.show()
+
+#%% Timetrails
+
+array = np.genfromtxt('timetrails.csv', delimiter=',', skip_header=1)
+length_saved = len(array)
+NDIM = 3
+number_of_atoms = 5
+
+q = np.zeros((length_saved, NDIM))
+
+plot_from = 1000
+plot_to = 4000
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+for i in range(1):
+    q[:,0] = array[:,0 + 3*i]
+    q[:,1] = array[:,1 + 3*i]
+    q[:,2] = array[:,2 + 3*i]
+
+    ax.plot(q[plot_from:plot_to,0], q[plot_from:plot_to,1], q[plot_from:plot_to,2])
+    
+    
+
+#%%
+    
+asasd = 0
+
+
+
+
+
+
+
+
+
+
+
+
 
