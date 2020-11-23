@@ -13,7 +13,7 @@ void MC(double *I, double *sigma2, int N){
     for(int i = 0; i < N; i++){
         x = (double) rand()/(double) RAND_MAX;
         fi += x*(1.0-x);
-        fi2 += pow(fi,2); 
+        fi2 += pow(x*(1.0-x),2); 
     }
     *I = fi/N;
     *sigma2 = fi2/N-pow(fi/N, 2);
@@ -30,6 +30,7 @@ void integrate(int N){
     printf("I = %f\n", 1.0/6.0);
     printf("I_N = %f\n", I);
     printf("sigma2 = %f\n", sigma2);
+    printf("sigma = %f\n", sqrt(sigma2)/sqrt(N));
 }
 
 // Main 
