@@ -1,9 +1,3 @@
-/*
- H1main.c
- 
- Created by Anders Lindman on 2013-10-31.
- */
-
 // Includes from C lib
 #include <stdio.h>
 #include <math.h>
@@ -33,11 +27,11 @@ double get_kinetic_energy(double v[][NDIM], int n_atoms, double m);
 void write_energy(double *kinetic_energy, double *potential_energy, double *time, int length_saved);
 
 
-/* Main program */
+// Main program
 int main(){
     // Initializing 
     // Time
-    double T    = 6;
+    double T    = 30;
     double dt   = 1e-3;
     int n_timesteps = T/dt;
 
@@ -84,13 +78,13 @@ int main(){
         }
     }
 
-//    double kinetic_time_average[length_saved];
-//    double virial_time_average[length_saved];
-//    for (int i = 0; i < length_saved; i++){
-//        kinetic_time_average[i] = 0;
-//        virial_time_average[i] = 0;
-//    }
-    
+    double kinetic_time_average[length_saved];
+    double virial_time_average[length_saved];
+    for (int i = 0; i < length_saved; i++){
+        kinetic_time_average[i] = 0;
+        virial_time_average[i] = 0;
+    }
+
     double temperature[length_saved];
     double pressure[length_saved];
     temperature[0] = 0;
@@ -104,8 +98,10 @@ int main(){
     double q5[length_saved][NDIM];
 
     // Equilibration
-    double start_equil = 2; 
-    double timestep_equil = start_equil/dt;
+    double start_temp = 2;
+    double start_pressure = 4;
+    double timestep_temp = start_temp/dt;
+    double timestep_pressure = start_pressure/dt;
     
     // Values for temp equilibration
     double T_equil = 500.0;
@@ -135,27 +131,25 @@ int main(){
     for(int t = 1; t < n_timesteps + 1; t++){
         verlet_timestep(pos, v, f, n_atoms, dt, m_al, L);
 
-        printf("Saving timestep: %d /%d\n", t, n_timesteps);
-
         kinetic_energy[t] = get_kinetic_energy(v, n_atoms, m_al);
         potential_energy[t] = get_energy_AL(pos, L, n_atoms);
         virial[t] = get_virial_AL(pos, L, n_atoms);
 
         temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
         pressure[t] =  (1.0/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
-
-        if(t > timestep_equil){ 
+     
+        // Rescaling of the velocites.  
+        if((t > timestep_temp && t < timestep_pressure) || (t > 2*timestep_pressure && t < 2.5*timestep_pressure)){
             alpha_t = 1.0 + (2.0*dt/tau_t)*((T_equil - temperature[t])/temperature[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
                     v[i][j] = sqrt(alpha_t)*v[i][j];
                 }
             }
-
-            kinetic_energy[t] = get_kinetic_energy(v, n_atoms, m_al);
-            temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
-            pressure[t] =  (1.0/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
-        
+            alpha_p = 1.0;
+        }
+       
+        if((t > timestep_pressure && t < 2*timestep_pressure) || t > 2.5*timestep_pressure){
             alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
@@ -163,9 +157,9 @@ int main(){
                 }
             }
         }
+
         V[t+1] = alpha_p*V[t];
         L = cbrt(alpha_p)*L;
-
 
         for (int i = 0; i < NDIM; i++){
             q1[t][i] = pos[0][i];
@@ -174,6 +168,8 @@ int main(){
             q4[t][i] = pos[3][i];
             q5[t][i] = pos[4][i];
         }
+
+        printf("Saving timestep: %d /%d\n", t, n_timesteps);
     }
 
     write_TPV(temperature, pressure, V, time, length_saved, "TPV");
@@ -196,8 +192,6 @@ int main(){
     }
 
     fclose(ftrail);
-
-    
 
 }
 

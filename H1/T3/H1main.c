@@ -85,15 +85,18 @@ int main(){
         }
     }
 
-//    double kinetic_time_average[length_saved];
-//    double virial_time_average[length_saved];
-//    for (int i = 0; i < length_saved; i++){
-//        kinetic_time_average[i] = 0;
-//        virial_time_average[i] = 0;
-//    }
+    double kinetic_time_average[length_saved];
+    double virial_time_average[length_saved];
+    for (int i = 0; i < length_saved; i++){
+        kinetic_time_average[i] = 0;
+        virial_time_average[i] = 0;
+    }
     
+    double temperature_instant = 0.0;
     double temperature[length_saved];
+    double pressure_instant = 0.0;
     double pressure[length_saved];
+
     temperature[0] = 0;
     pressure[0] = 0;
     
@@ -138,11 +141,13 @@ int main(){
                     v[i][j] = sqrt(alpha_t)*v[i][j];
                 }
             }
+        }
 
+        if(t > timestep_equil){
             kinetic_energy[t] = get_kinetic_energy(v, n_atoms, m_al);
             temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
             pressure[t] =  (1.0/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
-        
+    
             alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
@@ -150,6 +155,8 @@ int main(){
                 }
             }
         }
+
+
         V[t+1] = alpha_p*V[t];
         L = cbrt(alpha_p)*L;
     }
