@@ -18,12 +18,12 @@ double integrand(double *x, double *y, double *z){
 
 // Main 
 int main(){
-    int N = 300000;
-    int N_burn = 1000;
+    int N = 1e4;
+    int N_burn = 1e2;
 
-    double x[N];
-    double y[N];
-    double z[N];
+    double x;
+    double y;
+    double z;
     
     double f;
     double f_trial;
@@ -33,14 +33,16 @@ int main(){
     double r_x;
     double r_y;
     double r_z;
-    double delta = 2.5;
+    double delta = 3.1;
 
     double accept_rand;
 
     srand(time(NULL));
-    x[0] = (double) rand()/(double) RAND_MAX;
-    y[0] = (double) rand()/(double) RAND_MAX;
-    z[0] = (double) rand()/(double) RAND_MAX;
+    x = (double) rand()/(double) RAND_MAX;
+    y = (double) rand()/(double) RAND_MAX;
+    z = (double) rand()/(double) RAND_MAX;
+
+    double integral = 0.0;
 
     int accept = 0;
     for(int i = 0; i < N-1; i++){
@@ -48,45 +50,28 @@ int main(){
         r_y = (double) rand()/(double) RAND_MAX;
         r_z = (double) rand()/(double) RAND_MAX;
 
-        x_trial = x[i] + delta*(r_x-0.5);
-        y_trial = y[i] + delta*(r_y-0.5);
-        z_trial = z[i] + delta*(r_z-0.5);
+        x_trial = x + delta*(r_x-0.5);
+        y_trial = y + delta*(r_y-0.5);
+        z_trial = z + delta*(r_z-0.5);
 
-        f = weight(&x[i], &y[i], &z[i]);
+        f = weight(&x, &y, &z);
         f_trial = weight(&x_trial, &y_trial, &z_trial);
 
         accept_rand = (double) rand()/(double) RAND_MAX;
         
         if(f_trial > f || f_trial/f > accept_rand){
-            x[i+1] = x_trial;    
-            y[i+1] = y_trial;    
-            z[i+1] = z_trial;
+            x = x_trial;    
+            y = y_trial;    
+            z = z_trial;
             accept += 1;
-        } else { 
-            x[i+1] = x[i];    
-            y[i+1] = y[i];    
-            z[i+1] = z[i];
+        }
+
+        if(i > N_burn){
+            integral += integrand(&x, &y, &z); 
         }
     }
 
-
-    FILE *fp = fopen("walkers.csv", "w");
-    fprintf(fp, "x,y,z,weight\n");
-    for(int i = 0; i < N; i++){
-        fprintf(fp, "%f,%f,%f,%f\n", x[i], y[i], z[i], weight(&x[i], &y[i], &z[i]));
-    }
-    fclose(fp);
-
-    FILE *fn = fopen("N.csv", "w");
-    fprintf(fp, "N\n");
-    fprintf(fp, "%d,%d", N, N);
-    fclose(fn);
-
-    double integral = 0.0;
-    for(int i = N_burn; i < N; i++){
-        integral += integrand(&x[i], &y[i], &z[i]); 
-    }
-
+    integral += integrand(&x, &y, &z);
     integral = integral/(N-N_burn);
 
     printf("Exact integral: %f\n", 7.0/8.0);
