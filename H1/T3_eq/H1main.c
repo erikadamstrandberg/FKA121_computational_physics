@@ -78,13 +78,6 @@ int main(){
         }
     }
 
-    double kinetic_time_average[length_saved];
-    double virial_time_average[length_saved];
-    for (int i = 0; i < length_saved; i++){
-        kinetic_time_average[i] = 0;
-        virial_time_average[i] = 0;
-    }
-
     double temperature[length_saved];
     double pressure[length_saved];
     temperature[0] = 0;

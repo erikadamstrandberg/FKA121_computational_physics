@@ -84,7 +84,7 @@ plt.show()
 
 #%% Timetrails
 
-array = np.genfromtxt('timetrails.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('data/timetrails_500K.csv', delimiter=',', skip_header=1)
 length_saved = len(array)
 NDIM = 3
 number_of_atoms = 5
