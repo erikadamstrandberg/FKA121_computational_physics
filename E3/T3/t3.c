@@ -4,6 +4,7 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
+#include <gsl/gsl_rng.h>
 
 #define PI 3.14159265359
 
@@ -18,7 +19,7 @@ double integrand(double *x, double *y, double *z){
 
 // Main 
 int main(){
-    int N = 300000;
+    int N = 3e4;
     int N_burn = 1000;
 
     double x[N];
@@ -36,18 +37,25 @@ int main(){
     double delta = 2.5;
 
     double accept_rand;
+    
+    
+    const gsl_rng_type *T;
+    gsl_rng *Q;
+    gsl_rng_env_setup();
+    T = gsl_rng_default;
+    Q = gsl_rng_alloc(T);
+    gsl_rng_set(Q, time(NULL));
 
-    srand(time(NULL));
-    x[0] = (double) rand()/(double) RAND_MAX;
-    y[0] = (double) rand()/(double) RAND_MAX;
-    z[0] = (double) rand()/(double) RAND_MAX;
+    x[0] = gsl_rng_uniform(Q);
+    y[0] = gsl_rng_uniform(Q);
+    z[0] = gsl_rng_uniform(Q);
 
     int accept = 0;
     for(int i = 0; i < N-1; i++){
-        r_x = (double) rand()/(double) RAND_MAX;
-        r_y = (double) rand()/(double) RAND_MAX;
-        r_z = (double) rand()/(double) RAND_MAX;
-
+        r_x = gsl_rng_uniform(Q);
+        r_y = gsl_rng_uniform(Q);
+        r_z = gsl_rng_uniform(Q);
+        
         x_trial = x[i] + delta*(r_x-0.5);
         y_trial = y[i] + delta*(r_y-0.5);
         z_trial = z[i] + delta*(r_z-0.5);
@@ -55,7 +63,7 @@ int main(){
         f = weight(&x[i], &y[i], &z[i]);
         f_trial = weight(&x_trial, &y_trial, &z_trial);
 
-        accept_rand = (double) rand()/(double) RAND_MAX;
+        accept_rand = gsl_rng_uniform(Q);
         
         if(f_trial > f || f_trial/f > accept_rand){
             x[i+1] = x_trial;    
