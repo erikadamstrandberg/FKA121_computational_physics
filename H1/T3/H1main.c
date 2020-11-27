@@ -105,20 +105,6 @@ int main(){
     printf("initial potential energy: %f\n", potential_energy[0]);
     printf("initial kinetic energy: %f\n", kinetic_energy[0]);
 
-    double start_equil = 2; 
-    double timestep_equil = start_equil/dt;
-    
-    // Values for temp equilibration
-    double T_equil = 500.0;
-    double tau_t   = 200.0*dt;
-    double alpha_t = 1.0;
-
-    // Values for pressure equilibration
-    double P_equil      = 1e-4/TO_GPA;
-    double bulk_modulus = 62.0/TO_GPA;
-    double kappa_p      = 1.0/bulk_modulus;
-    double tau_p        = 400.0*dt;
-    double alpha_p      = 1.0;
 
     // Verlet evolving the system
     get_forces_AL(f,pos, L, n_atoms);
@@ -134,36 +120,9 @@ int main(){
         temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
         pressure[t] =  (1.0/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
 
-        if(t > timestep_equil){ 
-            alpha_t = 1.0 + (2.0*dt/tau_t)*((T_equil - temperature[t])/temperature[t]);
-            for(int i = 0; i < n_atoms; i++){
-                for(int j = 0; j < NDIM; j++){
-                    v[i][j] = sqrt(alpha_t)*v[i][j];
-                }
-            }
-        }
-
-        if(t > timestep_equil){
-            kinetic_energy[t] = get_kinetic_energy(v, n_atoms, m_al);
-            temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
-            pressure[t] =  (1.0/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
-    
-            alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
-            for(int i = 0; i < n_atoms; i++){
-                for(int j = 0; j < NDIM; j++){
-                    pos[i][j] = cbrt(alpha_p)*pos[i][j];
-                }
-            }
-        }
-
-
-        V[t+1] = alpha_p*V[t];
-        L = cbrt(alpha_p)*L;
     }
 
     write_TPV(temperature, pressure, V, time, length_saved, "TPV");
-    print_pos(pos, n_atoms, "pos_after_equil");
-    print_pos(v, n_atoms, "v_after_equil");
     
     
 

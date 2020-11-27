@@ -3,59 +3,39 @@
 #include <stdlib.h>
 
 #define NDIM 3
+#define N_ATOMS 256
 
 int main(){
 
-    int nrows = 4;
-    double mat[nrows][3];
-
-    FILE *f = fopen("testData.csv", "r");
-    int max = 100;
-    char buf[max];
-    for(int i = 0; i < nrows; i++){
-        fgets(buf, max, f);
-       // printf("%s", buf);
-        //scanf(buf, "%lf,%lf,%lf", &mat[2][0], &mat[2][1], &mat[2][2]);
-    }
-    fclose(f);
-
-    double x = 0;
-    double y = 0;
-    double z = 0;
-
-    char *end;
-    char str[] = "43.0,23.5,12.0";
     char *temp;
-    temp = strtok(str,",");
-
-//    printf("%f", strtod(temp,NULL));
-
-    x = strtod(temp, &end);
-    temp = strtok(NULL, ",");
-    y = strtod(temp, NULL);
-    temp = strtok(NULL, ",");
-    z = strtod(temp, NULL);
+    double pos[N_ATOMS][NDIM];
 
 
+    FILE *fp = fopen("../T3_eq/data/pos_500K_1fs_1.csv", "r");
+    char buf_value[10000];
+    char *end;
+    int skip_header = 0;
 
-    //while (temp != NULL){
-      //  temp = strtok(NULL, ",");
-       // printf("%f", strtod(temp, NULL));
-//    }
-
-    // Print mat
-    for(int i = 0; i < nrows; i++){
-       // printf("%f, %f, %f\n", mat[i][0], mat[i][1], mat[i][2]);
+    int atom_read = 0;
+    while(fgets(buf_value, N_ATOMS + 1, fp)){
+        if (skip_header != 0){
+            temp = strtok(buf_value,",");
+            pos[atom_read][0] = strtod(temp, &end);
+            temp = strtok(NULL, ",");
+            pos[atom_read][1] = strtod(temp, NULL);
+            temp = strtok(NULL, ",");
+            pos[atom_read][2] = strtod(temp, NULL);
+            atom_read += 1;
+        }
+        skip_header += 1;
     }
+    fclose(fp);
 
+    for (int i = 0; i < N_ATOMS; i++){
+        printf("%f,%f,%f\n", pos[i][0], pos[i][1], pos[i][2]);
+    }
 }
+    
 
-void read_initial_position(double *pos, int n_atoms){
-     FILE *f = fopen("data/pos_after_equil.csv", "r");
-     for(int i = 0; i < n_atoms; i++){
-         for(int j = 0; j < NDIM; j++){
-            //pos[i][j] = fscanf(f);
-            //fprint("atom %d\t %f\n", i, fscanf(f))
-         }
-     }
-}   
+
+

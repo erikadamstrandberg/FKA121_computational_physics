@@ -19,7 +19,7 @@ double integrand(double *x, double *y, double *z){
 
 // Main 
 int main(){
-    int N = 3e4;
+    int N = 1e5;
     int N_burn = 1000;
 
     double x[N];
@@ -36,8 +36,7 @@ int main(){
     double r_z;
     double delta = 2.5;
 
-    double accept_rand;
-    
+    double accept_rand;    
     
     const gsl_rng_type *T;
     gsl_rng *Q;

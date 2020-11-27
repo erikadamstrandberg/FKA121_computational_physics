@@ -30,7 +30,7 @@ void write_energy(double *kinetic_energy, double *potential_energy, double *time
 int main(){
     // Initializing 
     // Time
-    double T    = 60;
+    double T    = 80;
     double dt   = 2e-3;
     int n_timesteps = T/dt;
 
@@ -134,7 +134,7 @@ int main(){
         if(t> 2*timestep_pressure){
             T_equil = 700;
         }
-        if((t > timestep_temp && t < timestep_pressure) || (t > 2*timestep_pressure && t < 2.5*timestep_pressure)){
+        if((t > timestep_temp && t < timestep_pressure) || (t > 2.0*timestep_pressure && t < 2.5*timestep_pressure) || (t > 3.0*timestep_pressure && t < 3.5*timestep_pressure)){
             alpha_t = 1.0 + (2.0*dt/tau_t)*((T_equil - temperature[t])/temperature[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
@@ -144,7 +144,7 @@ int main(){
             alpha_p = 1.0;
         }
        
-        if((t > timestep_pressure && t < 2*timestep_pressure) || t > 2.5*timestep_pressure){
+        if((t > timestep_pressure && t < 2.0*timestep_pressure) || (t > 2.5*timestep_pressure && t < 3.0*timestep_pressure) || t > 3.5*timestep_pressure){
             alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
