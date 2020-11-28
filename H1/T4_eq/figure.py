@@ -91,7 +91,7 @@ number_of_atoms = 5
 
 q = np.zeros((length_saved, NDIM))
 
-plot_from = 1000
+plot_from = 10000
 plot_to = 40000
 
 fig = plt.figure()

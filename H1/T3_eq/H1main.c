@@ -155,11 +155,11 @@ int main(){
         L = cbrt(alpha_p)*L;
 
         for (int i = 0; i < NDIM; i++){
-            q1[t][i] = pos[0][i];
-            q2[t][i] = pos[1][i];
-            q3[t][i] = pos[2][i];
-            q4[t][i] = pos[3][i];
-            q5[t][i] = pos[4][i];
+            q1[t][i] = v[0][i];
+            q2[t][i] = v[1][i];
+            q3[t][i] = v[2][i];
+            q4[t][i] = v[3][i];
+            q5[t][i] = v[4][i];
         }
 
         printf("Saving timestep: %d /%d\n", t, n_timesteps);
@@ -169,7 +169,7 @@ int main(){
     print_pos(pos, n_atoms, "pos_after_equil");
     print_pos(v, n_atoms, "v_after_equil");
     
-    FILE *ftrail = fopen("timetrails.csv", "w");
+    FILE *ftrail = fopen("pos_timetrails.csv", "w");
     fprintf(ftrail, "x1,y1,z1,");
     fprintf(ftrail, "x2,y2,z2,");
     fprintf(ftrail, "x3,y3,z3,");
