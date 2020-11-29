@@ -1,9 +1,3 @@
-/*
- H1main.c
- 
- Created by Anders Lindman on 2013-10-31.
- */
-
 // Includes from C lib
 #include <stdio.h>
 #include <math.h>
@@ -17,6 +11,7 @@
 #include "H1potential.h"
 #include "write_to_file.h"
 
+// Constants
 #define NDIM 3
 #define KB 8.617e-5
 #define TO_GPA 160.2176

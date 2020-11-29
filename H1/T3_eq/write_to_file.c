@@ -39,3 +39,10 @@ void write_TPV(double *temperature, double *pressure, double *V, double *time, i
     free(filename_csv);
 }
 
+void write_energy(double *kinetic_energy, double *potential_energy, double *time, int length_saved){
+    FILE *fp = fopen("energy.csv", "w");
+    fprintf(fp, "kinetic_energy,potential_energy,time\n");
+    for(int t = 0; t < length_saved; t++){
+        fprintf(fp, "%f,%f,%f\n", kinetic_energy[t], potential_energy[t], time[t]);
+    }
+}
