@@ -25,8 +25,8 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 30;
-    double dt   = 1e-3;
+    double T    = 60;
+    double dt   = 3e-3;
     int n_timesteps = T/dt;
 
     // Decide how many timesteps to save.
@@ -90,20 +90,25 @@ int main(){
     double start_pressure = 4; 
     double start_temp_2 = 15;
     double start_pressure_2 = 20;
-
+    double start_temp_3 = 22;
+    double start_pressure_3 = 24;
 
     double timestep_temp = start_temp/dt;
     double timestep_pressure = start_pressure/dt;
     double timestep_temp_2 = start_temp_2/dt;
     double timestep_pressure_2 = start_pressure_2/dt;
+    double timestep_temp_3 = start_temp_3/dt;
+    double timestep_pressure_3 = start_pressure_3/dt;
+
 
     // Values for temp equilibration
-    double T_equil = 500.0;           // 500 K for solid phase
+    double T_equil = 1200.0;           // 700 K for liquid phase
+    double T_equil_target = 700.0;           // 700 K for liquid phase
     double tau_t   = 200.0*dt;
     double alpha_t = 1.0;
 
     // Values for pressure equilibration
-    double P_equil      = 1e-4;       // 1e-4 GPa = 1bar 
+    double P_equil      = 1e-2;       // 1e-4 GPa = 1bar 
     double bulk_modulus = 62.0;       // 62 - 102 GPa
     double kappa_p      = 1.0/bulk_modulus;
     double tau_p        = 500.0*dt;
@@ -138,8 +143,16 @@ int main(){
         temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
         pressure[t] =  (TO_GPA/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
      
+        // Change to target temperature
+        if (t > timestep_temp_2){
+            T_equil = T_equil_target;
+        }
+
         // Rescaling of the velocites for temperature equilibration
-        if((t > timestep_temp && t < timestep_pressure) || (t > timestep_temp_2 && t < timestep_pressure_2)){
+        if((t > timestep_temp && t < timestep_pressure) || 
+           (t > timestep_temp_2 && t < timestep_pressure_2) || 
+           (t > timestep_temp_3 && t < timestep_pressure_3)){
+
             alpha_t = 1.0 + (2.0*dt/tau_t)*((T_equil - temperature[t])/temperature[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
@@ -151,7 +164,10 @@ int main(){
         }
        
         // Rescaling of the positions for pressure equlibration
-        if((t > timestep_pressure && t < timestep_temp_2) || t > timestep_pressure_2){
+        if((t > timestep_pressure && t < timestep_temp_2) || 
+           (t > timestep_pressure_2 && t < timestep_temp_3) ||
+           (t > timestep_pressure_3)){
+
             alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){

@@ -7,7 +7,7 @@ N = 256
 
 #%%
 
-array = np.genfromtxt('data/TPV_500K_1fs_1.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('data/TPV_700K_1fs_1.csv', delimiter=',', skip_header=1)
 
 temp     = array[:, 0]
 pressure = array[:, 1]
@@ -16,12 +16,12 @@ time     = array[:, 3]
 
 #%% Plotting temp equil
 
-T_equil = 500
+T_equil = 700
 T_start = 2
 T_tau   = T_start + 200*1e-3
 
-y_min = 300
-y_max = 1000
+y_min = 500
+y_max = 1200
 
 fig, ax = plt.subplots()
 ax.plot(time, temp, color='blue', label=r"$T(t)$")
@@ -37,7 +37,7 @@ ax.legend(fontsize='16')
 
 ax.set_ylim([y_min, y_max])
 
-plt.savefig('figure/temp_equil_T500.pdf', format='pdf', bbox_inches='tight')
+plt.savefig('figure/temp_equil_T700.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
 #%% Plotting pressure equil
@@ -62,7 +62,7 @@ ax.grid()
 ax.legend(fontsize='16')
 ax.set_ylim([y_min, y_max])
 
-plt.savefig('figure/pressure_equil_T500.pdf', format='pdf', bbox_inches='tight')
+plt.savefig('figure/pressure_equil_T700.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
 #%% Volume 
@@ -77,7 +77,7 @@ ax.set_ylabel(r'$V$ [$Å^3$]', fontsize='16')
 ax.grid()
 ax.legend(fontsize='16')
 
-plt.savefig('figure/volume_equil_T500.pdf', format='pdf', bbox_inches='tight')
+plt.savefig('figure/volume_equil_T700.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
 #%% Timetrails

@@ -7,7 +7,7 @@ N = 256
 
 #%%
 
-array = np.genfromtxt('data/TPV_500K_1fs_1.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('data/TPV_500K_1fs_2.csv', delimiter=',', skip_header=1)
 
 temp     = array[:, 0]
 pressure = array[:, 1]
@@ -44,7 +44,7 @@ plt.show()
 
 P_equil = 1e-4
 T_start = 4
-T_tau = T_start + 400*3e-3
+T_tau = T_start + 500*1e-3
 
 y_min = -1
 y_max = 5
@@ -82,7 +82,7 @@ plt.show()
 
 #%% Timetrails
 
-array = np.genfromtxt('timetrail.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('pos_timetrails.csv', delimiter=',', skip_header=1)
 length_saved = len(array)
 NDIM = 3
 number_of_atoms = 5
@@ -94,7 +94,7 @@ plot_to = 30000
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-for i in range(1):
+for i in range(4):
     q[:,0] = array[:,0 + 3*i]
     q[:,1] = array[:,1 + 3*i]
     q[:,2] = array[:,2 + 3*i]

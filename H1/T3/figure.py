@@ -24,7 +24,7 @@ ax.plot(time, E_tot)
 array = np.genfromtxt('TPV.csv', delimiter=',', skip_header=1)
 
 start = 1
-N = 400000
+N = 1000
 
 temp     = array[start:N, 0]
 pressure = array[start:N, 1]
@@ -37,17 +37,20 @@ for i in range(len(T_average)):
 fig, ax = plt.subplots()
 ax.plot(time, T_average)
 
+
+
+
 P_average = np.zeros(len(temp))
 for i in range(len(P_average)):
     P_average[i] = np.sum(pressure[0:i])/i
     
     
-x = np.array([0,20])
-y = np.array([0.0001,0])
+x = np.array([0,100])
+y = np.array([0.0001,0.0001])
 
 fig, ax = plt.subplots()
 ax.plot(time, P_average)
 ax.plot(x, y)
 
 ax.set_xlim([0, 100])
-x.set_ylim([-0.01, 0.02])
+ax.set_ylim([-0.0001, 0.02])
