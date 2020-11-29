@@ -7,7 +7,7 @@ N = 256
 
 #%%
 
-array = np.genfromtxt('data/TPV.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('data/TPV_500K_1fs_1.csv', delimiter=',', skip_header=1)
 
 temp     = array[:, 0]
 pressure = array[:, 1]
@@ -16,7 +16,7 @@ time     = array[:, 3]
 
 #%% Plotting temp equil
 
-T_equil = 700
+T_equil = 500
 T_start = 2
 T_tau   = T_start + 200*1e-3
 
@@ -44,15 +44,13 @@ plt.show()
 
 P_equil = 1e-4
 T_start = 4
-T_tau = T_start + 400*1e-3
+T_tau = T_start + 400*3e-3
 
 y_min = -1
 y_max = 5
 
-pressure_GPa = pressure*160.2
-
 fig, ax = plt.subplots()
-ax.plot(time, pressure_GPa, color='orange', label=r"$P(t)$")
+ax.plot(time, pressure, color='orange', label=r"$P(t)$")
 ax.plot([min(time), max(time)], [P_equil, P_equil], color='black', label=r"$P_{solid}$")
 ax.plot([T_start, T_start], [y_min, y_max], '--',   color='black', label=r"$t_{start}= 4$ ps")
 ax.plot([T_tau, T_tau], [y_min, y_max], '--',       color= 'red' , label=r"$\tau_{p}= 400$ dt")
@@ -84,15 +82,15 @@ plt.show()
 
 #%% Timetrails
 
-array = np.genfromtxt('timetrails.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('timetrail.csv', delimiter=',', skip_header=1)
 length_saved = len(array)
 NDIM = 3
 number_of_atoms = 5
 
 q = np.zeros((length_saved, NDIM))
 
-plot_from = 10000
-plot_to = 40000
+plot_from = 1000
+plot_to = 30000
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -103,3 +101,16 @@ for i in range(1):
 
     ax.plot(q[plot_from:plot_to,0], q[plot_from:plot_to,1], q[plot_from:plot_to,2])
     
+
+
+
+
+
+
+
+
+
+
+
+
+

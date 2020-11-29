@@ -1,13 +1,9 @@
-/*
- H1potential.c
- Program that contains functions that calculate properties (potential energy, forces, etc.) of a set of Aluminum atoms using an embedded atom model (EAM) potential.  
- Created by Anders Lindman on 2013-03-14.
- */
-
-
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <time.h>
+
+#define NDIM 3
 
 /*Parameters for the AL EAM potential */
 #define PAIR_POTENTIAL_ROWS 18
@@ -433,3 +429,51 @@ double get_virial_AL(double positions[][3], double cell_length, int nbr_atoms)
   return(virial);
   
 }
+
+double get_kinetic_energy(double v[][NDIM], int n_atoms, double m){
+    double energy = 0.0;
+    for(int i = 0; i < n_atoms; i++){
+        for(int j = 0; j < NDIM; j++){
+            energy += m*pow(v[i][j],2)/2.0;
+        }
+    }  
+    return energy;
+}
+
+void verlet_timestep(double pos[][NDIM], double v[][NDIM], double f[][NDIM], 
+                     int n_atoms, 
+                     double dt, 
+                     double m, 
+                     double L){
+
+    for(int i = 0; i < n_atoms; i++){
+        for(int j = 0; j < NDIM; j++){
+            v[i][j] += dt*f[i][j]/(2.0*m);
+            pos[i][j] += dt*v[i][j];
+        }
+    }
+
+    get_forces_AL(f,pos, L, n_atoms);
+
+    for(int i = 0; i < n_atoms; i++){
+        for(int j = 0; j < NDIM; j++){
+            v[i][j] += dt*f[i][j]/(2.0*m);
+        }
+    }
+}
+
+
+void random_displacement(double pos[][NDIM], int n_atoms, double interval){
+    srand(time(NULL));
+    double random_value;
+    double random_disp;
+
+    for(int i = 0; i < n_atoms; i++){
+        for(int j = 0; j < NDIM; j++){
+            random_value = (double) rand() / (double) RAND_MAX;
+            random_disp = random_value*2*interval-interval;
+            pos[i][j] += random_disp;
+        }
+    }
+}
+
