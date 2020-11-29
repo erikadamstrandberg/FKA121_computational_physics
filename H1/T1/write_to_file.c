@@ -12,7 +12,6 @@ void print_pos(double pos[][NDIM], int n_atoms, char *filename){
     strcat(filename_csv, ".csv");
 
     FILE *fpos = fopen(filename_csv, "w");
-    fprintf(fpos, "x,y,z\n");
     for(int i = 0; i < n_atoms; i++){
         for(int j = 0; j < NDIM; j++){
             if(j==2){

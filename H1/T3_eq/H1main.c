@@ -95,19 +95,23 @@ int main(){
     double start_pressure = 4;
     double timestep_temp = start_temp/dt;
     double timestep_pressure = start_pressure/dt;
-    
+   
+    double start_temp_2 = 15;
+    double start_pressure_2 = 20;
+    double timestep_temp_2 = start_temp_2/dt;
+    double timestep_pressure_2 = start_pressure_2/dt;
+
     // Values for temp equilibration
     double T_equil = 500.0;
     double tau_t   = 200.0*dt;
     double alpha_t = 1.0;
 
     // Values for pressure equilibration
-    double P_equil      = 1e-4/TO_GPA;
-    double bulk_modulus = 62.0/TO_GPA;
+    double P_equil      = 1e-4;
+    double bulk_modulus = 62.0;
     double kappa_p      = 1.0/bulk_modulus;
-    double tau_p        = 400.0*dt;
+    double tau_p        = 500.0*dt;
     double alpha_p      = 1.0;
-    
 
     // Print information before Verlet
     printf("number of timesteps: %d\n", n_timesteps);
@@ -129,10 +133,10 @@ int main(){
         virial[t] = get_virial_AL(pos, L, n_atoms);
 
         temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
-        pressure[t] =  (1.0/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
+        pressure[t] =  (TO_GPA/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
      
         // Rescaling of the velocites.  
-        if((t > timestep_temp && t < timestep_pressure) || (t > 2*timestep_pressure && t < 2.5*timestep_pressure)){
+        if((t > timestep_temp && t < timestep_pressure) || (t > timestep_temp_2 && t < timestep_pressure_2)){
             alpha_t = 1.0 + (2.0*dt/tau_t)*((T_equil - temperature[t])/temperature[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
@@ -142,7 +146,7 @@ int main(){
             alpha_p = 1.0;
         }
        
-        if((t > timestep_pressure && t < 2*timestep_pressure) || t > 2.5*timestep_pressure){
+        if((t > timestep_pressure && t < timestep_temp_2) || t > timestep_pressure_2){
             alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
@@ -168,7 +172,11 @@ int main(){
     write_TPV(temperature, pressure, V, time, length_saved, "TPV");
     print_pos(pos, n_atoms, "pos_after_equil");
     print_pos(v, n_atoms, "v_after_equil");
-    
+   
+    FILE *ffinal_volume = fopen("final_volume.csv", "w");
+    fprintf(ffinal_volume, "%f,", V[length_saved]);
+    fclose(ffinal_volume);
+
     FILE *ftrail = fopen("pos_timetrails.csv", "w");
     fprintf(ftrail, "x1,y1,z1,");
     fprintf(ftrail, "x2,y2,z2,");
