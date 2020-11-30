@@ -7,7 +7,7 @@ N = 256
 
 #%%
 
-array = np.genfromtxt('data/TPV_500K_1fs_2.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('../T3_eq/data/TPV_500C_1fs_1.csv', delimiter=',', skip_header=1)
 
 temp     = array[:, 0]
 pressure = array[:, 1]
@@ -16,7 +16,7 @@ time     = array[:, 3]
 
 #%% Plotting temp equil
 
-T_equil = 500
+T_equil = 500 + 272.15
 T_start = 2
 T_tau   = T_start + 200*1e-3
 
@@ -79,38 +79,4 @@ ax.legend(fontsize='16')
 
 plt.savefig('figure/volume_equil_T500.pdf', format='pdf', bbox_inches='tight')
 plt.show()
-
-#%% Timetrails
-
-array = np.genfromtxt('pos_timetrails.csv', delimiter=',', skip_header=1)
-length_saved = len(array)
-NDIM = 3
-number_of_atoms = 5
-
-q = np.zeros((length_saved, NDIM))
-
-plot_from = 1000
-plot_to = 30000
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-for i in range(4):
-    q[:,0] = array[:,0 + 3*i]
-    q[:,1] = array[:,1 + 3*i]
-    q[:,2] = array[:,2 + 3*i]
-
-    ax.plot(q[plot_from:plot_to,0], q[plot_from:plot_to,1], q[plot_from:plot_to,2])
-    
-
-
-
-
-
-
-
-
-
-
-
-
 

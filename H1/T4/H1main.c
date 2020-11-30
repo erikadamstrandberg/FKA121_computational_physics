@@ -18,11 +18,11 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 2;
+    double T    = 100.0;
     double dt   = 2.0e-3;
     int n_timesteps = T/dt;
 
-    int save_every = 2;
+    int save_every = 100;
     int length_saved = n_timesteps/save_every + 1;
     double time[length_saved];
 
@@ -37,14 +37,14 @@ int main(){
 
     double pos[n_atoms][NDIM];
     double v[n_atoms][NDIM]; 
-    initialize_atoms(pos, n_atoms, "../T4_eq/data/pos_700K_1fs_1.csv");
-    initialize_atoms(v, n_atoms, "../T4_eq/data/v_700K_1fs_1.csv");
-//    initialize_atoms(pos, n_atoms, "pos_after_equil.csv");
-//    initialize_atoms(v, n_atoms, "v_after_equil.csv");
+    initialize_atoms(pos, n_atoms, "../T4_eq/data/pos_700C_1fs_1.csv");
+    initialize_atoms(v, n_atoms, "../T4_eq/data/v_700C_1fs_1.csv");
+//    initialize_atoms(pos, n_atoms, "pos_after.csv");
+//    initialize_atoms(v, n_atoms, "v_after.csv");
 
 
     double V = 0.0;
-    get_volume(&V, "../T4_eq/data/final_v_700K_1fs_1.csv");
+    get_volume(&V, "../T4_eq/data/final_v_700C_1fs_1.csv");
     double L = cbrt(V);
 
     // Energy
@@ -72,7 +72,16 @@ int main(){
     double q_trail[length_saved][all_dim];
     double v_trail[length_saved][all_dim];
 
-    int count = 0;
+    for (int i = 0; i < n_atoms; i++){
+        q_trail[0][3*i + 0] = pos[i][0];
+        q_trail[0][3*i + 1] = pos[i][1];
+        q_trail[0][3*i + 2] = pos[i][2];
+        v_trail[0][3*i + 0] = v[i][0];
+        v_trail[0][3*i + 1] = v[i][1];
+        v_trail[0][3*i + 2] = v[i][2];
+    }
+
+    int count = 1;
 
     // Verlet evolving the system
     get_forces_AL(f, pos, L, n_atoms);
@@ -87,7 +96,6 @@ int main(){
             temperature[count] = (2.0/(3.0*n_atoms))*kinetic_energy[count]/KB; 
             pressure[count] =  (TO_GPA/V)*(n_atoms*KB*temperature[count] + virial[count]);
 
-            count += 1;
                 
             for(int i = 0; i < n_atoms; i++){
                 q_trail[count][3*i + 0] = pos[i][0];
@@ -97,7 +105,9 @@ int main(){
                 v_trail[count][3*i + 1] = v[i][1];
                 v_trail[count][3*i + 2] = v[i][2];
             }
-            printf("Saving timestep: %d /%d\n", t, n_timesteps);
+            
+            count += 1;
+            printf("Saving timestep: %d /%d\n", count, length_saved);
         }
     }
 
@@ -105,8 +115,8 @@ int main(){
 
     write_TPV(temperature, pressure, time, length_saved, "TPV");
     write_energy(kinetic_energy, potential_energy, time, length_saved);
-    print_pos(pos, n_atoms, "pos_after_equil");
-    print_pos(v, n_atoms, "v_after_equil");
+    print_pos(pos, n_atoms, "pos_after");
+    print_pos(v, n_atoms, "v_after");
 
     FILE *tq = fopen("q_trail.csv", "w");
     for(int i = 0; i < length_saved; i++){

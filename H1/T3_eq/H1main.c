@@ -98,7 +98,7 @@ int main(){
     double timestep_pressure_2 = start_pressure_2/dt;
 
     // Values for temp equilibration
-    double T_equil = 500.0;           // 500 K for solid phase
+    double T_equil = 500.0 + 272.15;           //  K for solid phase
     double tau_t   = 200.0*dt;
     double alpha_t = 1.0;
 

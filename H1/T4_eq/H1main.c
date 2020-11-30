@@ -25,8 +25,8 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 60;
-    double dt   = 3e-3;
+    double T    = 30;
+    double dt   = 1e-3;
     int n_timesteps = T/dt;
 
     // Decide how many timesteps to save.
@@ -87,11 +87,11 @@ int main(){
     // We found most succes doing the equilibration in
     // 2 steps
     double start_temp = 2;
-    double start_pressure = 4; 
-    double start_temp_2 = 15;
-    double start_pressure_2 = 20;
-    double start_temp_3 = 22;
-    double start_pressure_3 = 24;
+    double start_pressure = 8; 
+    double start_temp_2 = 10;
+    double start_pressure_2 = 12;
+    double start_temp_3 = 14;
+    double start_pressure_3 = 16;
 
     double timestep_temp = start_temp/dt;
     double timestep_pressure = start_pressure/dt;
@@ -102,8 +102,8 @@ int main(){
 
 
     // Values for temp equilibration
-    double T_equil = 1200.0;           // 700 K for liquid phase
-    double T_equil_target = 700.0;           // 700 K for liquid phase
+    double T_equil = 1600 + 272.15;           // 700 K for liquid phase
+    double T_equil_target = 700.0 + 272.15;           // 700 C for liquid phase
     double tau_t   = 200.0*dt;
     double alpha_t = 1.0;
 

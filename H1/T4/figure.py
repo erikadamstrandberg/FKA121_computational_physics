@@ -7,7 +7,7 @@ N = 256
 
 #%%
 
-array = np.genfromtxt('energy.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('../T4/energy.csv', delimiter=',', skip_header=1)
 
 E_kin = array[:, 0]
 E_pot = array[:, 1]
@@ -21,7 +21,7 @@ ax.plot(time, E_tot)
 
 #%%
 
-array = np.genfromtxt('TPV.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('../T4/TPV.csv', delimiter=',', skip_header=1)
 
 start = 1
 N = len(array)
@@ -44,10 +44,25 @@ for i in range(len(P_average)):
     
 x = np.array([0,20])
 y = np.array([0.0001,0])
-
+    
 fig, ax = plt.subplots()
 ax.plot(time, P_average)
 
 #ax.set_xlim([0, 100])
 #ax.set_ylim([-0.01, 0.02])
+
+
+#%% Timetrails
+
+pos_data = np.genfromtxt('../T4/q_trail.csv', delimiter=',')
+M, n_particles = np.shape(pos_data)
+n_particles = int(n_particles/3)
+
+atom_number = 1
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot(pos_data[:,atom_number], pos_data[:,atom_number+1], pos_data[:,atom_number+2])
+
+
 

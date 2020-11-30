@@ -7,7 +7,7 @@ N = 256
 
 #%%
 
-array = np.genfromtxt('energy.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('../T3/energy.csv', delimiter=',', skip_header=1)
 
 E_kin = array[:, 0]
 E_pot = array[:, 1]
@@ -21,10 +21,10 @@ ax.plot(time, E_tot)
 
 #%%
 
-array = np.genfromtxt('TPV.csv', delimiter=',', skip_header=1)
+array = np.genfromtxt('../T3/TPV.csv', delimiter=',', skip_header=1)
 
 start = 1
-N = 1000
+N = 10000
 
 temp     = array[start:N, 0]
 pressure = array[start:N, 1]
@@ -52,5 +52,15 @@ fig, ax = plt.subplots()
 ax.plot(time, P_average)
 ax.plot(x, y)
 
-ax.set_xlim([0, 100])
-ax.set_ylim([-0.0001, 0.02])
+#%% Timetrails
+
+pos_data = np.genfromtxt('../T3/q_trail.csv', delimiter=',')
+M, n_particles = np.shape(pos_data)
+n_particles = int(n_particles/3)
+
+atom_number = 100
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot(pos_data[:,atom_number], pos_data[:,atom_number+1], pos_data[:,atom_number+2])
+
