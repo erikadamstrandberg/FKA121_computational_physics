@@ -18,11 +18,11 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 10;
-    double dt   = 1.0e-3;
+    double T    = 2;
+    double dt   = 2.0e-3;
     int n_timesteps = T/dt;
 
-    int save_every = 100;
+    int save_every = 2;
     int length_saved = n_timesteps/save_every + 1;
     double time[length_saved];
 

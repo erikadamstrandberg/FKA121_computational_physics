@@ -18,7 +18,7 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 0.1;
+    double T    = 2;
     double dt   = 3.0e-3;
     int n_timesteps = T/dt;
 
