@@ -79,11 +79,3 @@ ax.legend(fontsize='16')
 
 plt.savefig('figure/volume_equil_T700.pdf', format='pdf', bbox_inches='tight')
 plt.show()
-
-#%%
-
-P_average = np.zeros(len(pressure))
-for i in range(len(P_average)):
-    P_average[i] = np.sum(pressure[0:i])/i
-    
-    
