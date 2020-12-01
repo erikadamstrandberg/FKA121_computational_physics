@@ -23,8 +23,8 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 60;
-    double dt   = 2e-3;
+    double T    = 20;
+    double dt   = 1e-3;
     int n_timesteps = T/dt;
 
     // Decide how many timesteps to save.

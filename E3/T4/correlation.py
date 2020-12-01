@@ -43,7 +43,7 @@ for k in ks:
     
     
 x = np.array([0, how_many])
-y = np.array([0.1, 0.1])
+y = np.array([0.13, 0.13])
     
 fig, ax = plt.subplots()
 ax.plot(ks, omega)

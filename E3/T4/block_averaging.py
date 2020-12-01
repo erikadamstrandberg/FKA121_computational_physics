@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 data = np.genfromtxt('MC.txt', delimiter=',', skip_header=1)
 
 M = len(data)                   # number of data points
-B_array = np.arange(50, 550, 50)   # size of each block
+B_array = np.arange(50, 3000, 50)   # size of each block
 n_s = np.zeros(len(B_array))
 
 var_f = np.sum(data**2)/M - (np.sum(data)/M)**2

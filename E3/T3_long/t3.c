@@ -18,7 +18,7 @@ double integrand(double *x, double *y, double *z){
 
 // Main 
 int main(){
-    int N = 1e4;
+    int N = 1e8;
     int N_burn = 1e2;
 
     double x;

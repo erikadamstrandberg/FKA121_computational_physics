@@ -23,7 +23,7 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 60;
+    double T    = 20;
     double dt   = 1e-3;
     int n_timesteps = T/dt;
 
@@ -86,10 +86,10 @@ int main(){
     // 2 steps
     double start_temp = 2;
     double start_pressure = 8; 
-    double start_temp_2 = 10;
-    double start_pressure_2 = 12;
-    double start_temp_3 = 14;
-    double start_pressure_3 = 16;
+    double start_temp_2 = 12;
+    double start_pressure_2 = 14;
+    double start_temp_3 = 16;
+    double start_pressure_3 = 20;
 
     double timestep_temp = start_temp/dt;
     double timestep_pressure = start_pressure/dt;
