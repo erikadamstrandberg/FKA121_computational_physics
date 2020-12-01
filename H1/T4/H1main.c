@@ -129,7 +129,7 @@ int main(){
     fclose(tq);
     FILE *tv = fopen("v_trail.csv", "w");
     for(int i = 0; i < length_saved; i++){
-        for(int j = 0; j < all_dim; j++){
+       for(int j = 0; j < all_dim; j++){
             fprintf(tv, "%f,", v_trail[i][j]);
         }
         fprintf(tq, "%f", time[i]);

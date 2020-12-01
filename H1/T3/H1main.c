@@ -121,6 +121,7 @@ int main(){
         for(int j = 0; j < all_dim; j++){
             fprintf(tq, "%f,", q_trail[i][j]);
         }
+        fprintf(tq, "%f", time[i]);
         fprintf(tq, "\n");
     }
     fclose(tq);
@@ -129,6 +130,7 @@ int main(){
         for(int j = 0; j < all_dim; j++){
             fprintf(tv, "%f,", v_trail[i][j]);
         }
+        fprintf(tv, "%f", time[i]);
         fprintf(tv, "\n");
     }
     fclose(tv);
