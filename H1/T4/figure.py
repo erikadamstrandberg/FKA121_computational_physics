@@ -23,7 +23,7 @@ ax.plot(time, E_tot)
 
 array = np.genfromtxt('../T4/TPV.csv', delimiter=',', skip_header=1)
 
-start = 1
+start = 450
 N = len(array)
 
 temp     = array[start:N, 0]
