@@ -115,7 +115,7 @@ omega = 2*np.pi*f
 phi_spectrum = np.zeros(len(omega))
 for i in range(len(omega)):
     cos = np.dot(phi_tot, np.cos(time*omega[i]))
-    phi_spectrum[i] = 2*np.sum(cos)/M
+    phi_spectrum[i] = 2*cos/M
     
 Ds = phi_spectrum[0]/6
 print(Ds)

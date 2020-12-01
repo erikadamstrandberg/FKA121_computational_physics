@@ -18,8 +18,8 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 2;
-    double dt   = 3.0e-3;
+    double T    = 0.5;
+    double dt   = 1.0e-3;
     int n_timesteps = T/dt;
 
     int save_every = 1;
@@ -37,10 +37,10 @@ int main(){
 
     double pos[n_atoms][NDIM];
     double v[n_atoms][NDIM]; 
-    initialize_atoms(pos, n_atoms, "../T3_eq/data/pos_500C_1fs_1.csv");
-    initialize_atoms(v, n_atoms, "../T3_eq/data/v_500C_1fs_1.csv");
-//    initialize_atoms(pos, n_atoms, "pos_after.csv");
-//    initialize_atoms(v, n_atoms, "v_after.csv");
+//    initialize_atoms(pos, n_atoms, "../T3_eq/data/pos_500C_1fs_1.csv");
+//    initialize_atoms(v, n_atoms, "../T3_eq/data/v_500C_1fs_1.csv");
+    initialize_atoms(pos, n_atoms, "pos_after.csv");
+    initialize_atoms(v, n_atoms, "v_after.csv");
 
 
     double V = 0.0;
