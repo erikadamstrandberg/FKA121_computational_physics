@@ -25,7 +25,7 @@ y_max = 1000
 
 fig, ax = plt.subplots()
 ax.plot(time, temp, color='blue', label=r"$T(t)$")
-ax.plot([min(time), max(time)], [T_equil, T_equil], color='black', label=r"$T_{solid}=500$ K")
+ax.plot([min(time), max(time)], [T_equil, T_equil], color='black', label=r"$T_{solid}=500\ ^{\circ}$C")
 ax.plot([T_start, T_start], [y_min, y_max], '--',   color='black', label=r"$t_{start}= 2$ ps",)
 ax.plot([T_tau, T_tau], [y_min, y_max], '--',       color= 'red' , label=r"$\tau_{t}= 200$ dt")
 

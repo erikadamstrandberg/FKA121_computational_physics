@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <time.h>
-#include <gsl/gsl_const_mksa.h>
 
 // Our own headers
 #include "H1lattice.h"
@@ -25,7 +23,7 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 30;
+    double T    = 60;
     double dt   = 1e-3;
     int n_timesteps = T/dt;
 
@@ -108,7 +106,7 @@ int main(){
     double alpha_t = 1.0;
 
     // Values for pressure equilibration
-    double P_equil      = 1e-2;       // 1e-4 GPa = 1bar 
+    double P_equil      = 1e-4;       // 1e-4 GPa = 1bar 
     double bulk_modulus = 62.0;       // 62 - 102 GPa
     double kappa_p      = 1.0/bulk_modulus;
     double tau_p        = 500.0*dt;
@@ -149,7 +147,7 @@ int main(){
         }
 
         // Rescaling of the velocites for temperature equilibration
-        if((t > timestep_temp && t < timestep_pressure) || 
+        if((t > timestep_temp   && t < timestep_pressure) || 
            (t > timestep_temp_2 && t < timestep_pressure_2) || 
            (t > timestep_temp_3 && t < timestep_pressure_3)){
 
@@ -164,21 +162,26 @@ int main(){
         }
        
         // Rescaling of the positions for pressure equlibration
-        if((t > timestep_pressure && t < timestep_temp_2) || 
+        if((t > timestep_pressure   && t < timestep_temp_2) || 
            (t > timestep_pressure_2 && t < timestep_temp_3) ||
            (t > timestep_pressure_3)){
 
             alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
+
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
                     pos[i][j] = cbrt(alpha_p)*pos[i][j];
                 }
             }
+            // Rescale size of simulation box
+            L = cbrt(alpha_p)*L;
+            
+            // Update forces the next velocity calculation
+            get_forces_AL(f, pos, L, n_atoms);
         }
 
         // Saving the time trail of changed volume
         V[t+1] = alpha_p*V[t];
-        L = cbrt(alpha_p)*L;
 
         printf("Saving timestep: %d /%d\n", t, n_timesteps);
     }

@@ -18,11 +18,11 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 100.0;
-    double dt   = 2.0e-3;
+    double T    = 3.0;
+    double dt   = 3.0e-3;
     int n_timesteps = T/dt;
 
-    int save_every = 100;
+    int save_every = 10;
     int length_saved = n_timesteps/save_every + 1;
     double time[length_saved];
 
@@ -123,6 +123,7 @@ int main(){
         for(int j = 0; j < all_dim; j++){
             fprintf(tq, "%f,", q_trail[i][j]);
         }
+        fprintf(tq, "%f", time[i]);
         fprintf(tq, "\n");
     }
     fclose(tq);
@@ -131,6 +132,7 @@ int main(){
         for(int j = 0; j < all_dim; j++){
             fprintf(tv, "%f,", v_trail[i][j]);
         }
+        fprintf(tq, "%f", time[i]);
         fprintf(tv, "\n");
     }
     fclose(tv);

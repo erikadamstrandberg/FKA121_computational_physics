@@ -58,7 +58,7 @@ pos_data = np.genfromtxt('../T4/q_trail.csv', delimiter=',')
 M, n_particles = np.shape(pos_data)
 n_particles = int(n_particles/3)
 
-atom_number = 1
+atom_number = 2
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')

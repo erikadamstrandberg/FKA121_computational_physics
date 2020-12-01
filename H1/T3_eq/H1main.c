@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <time.h>
-#include <gsl/gsl_const_mksa.h>
 
 // Our own headers
 #include "H1lattice.h"
@@ -25,8 +23,8 @@
 int main(){
     // Initializing 
     // Time
-    double T    = 30;
-    double dt   = 1e-3;
+    double T    = 60;
+    double dt   = 2e-3;
     int n_timesteps = T/dt;
 
     // Decide how many timesteps to save.
@@ -87,11 +85,9 @@ int main(){
     // We found most succes doing the equilibration in
     // 2 steps
     double start_temp = 2;
-    double start_pressure = 4; 
-    double start_temp_2 = 15;
-    double start_pressure_2 = 20;
-
-
+    double start_pressure = 6;
+    double start_temp_2 = 8;
+    double start_pressure_2 = 10;
     double timestep_temp = start_temp/dt;
     double timestep_pressure = start_pressure/dt;
     double timestep_temp_2 = start_temp_2/dt;
@@ -106,7 +102,7 @@ int main(){
     double P_equil      = 1e-4;       // 1e-4 GPa = 1bar 
     double bulk_modulus = 62.0;       // 62 - 102 GPa
     double kappa_p      = 1.0/bulk_modulus;
-    double tau_p        = 500.0*dt;
+    double tau_p        = 200.0*dt;
     double alpha_p      = 1.0;
 
     // Print information before Verlet for convinience
@@ -137,33 +133,42 @@ int main(){
         // Temperature in K and pressure in GPa
         temperature[t] = (2.0/(3.0*n_atoms))*kinetic_energy[t]/KB; 
         pressure[t] =  (TO_GPA/V[t])*(n_atoms*KB*temperature[t] + virial[t]);
-     
+        
         // Rescaling of the velocites for temperature equilibration
-        if((t > timestep_temp && t < timestep_pressure) || (t > timestep_temp_2 && t < timestep_pressure_2)){
+        if((t > timestep_temp && t < timestep_pressure) ||
+           (t > timestep_temp_2 && t < timestep_pressure_2)){
+
             alpha_t = 1.0 + (2.0*dt/tau_t)*((T_equil - temperature[t])/temperature[t]);
+
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
                     v[i][j] = sqrt(alpha_t)*v[i][j];
                 }
             }
-            // We do not want to rescale V or L during temp equiilibration
+            // We do not rescale V or L during temp equiilibration
             alpha_p = 1.0;
         }
        
         // Rescaling of the positions for pressure equlibration
-        if((t > timestep_pressure && t < timestep_temp_2) || t > timestep_pressure_2){
+        if((t > timestep_pressure && t < timestep_temp_2) ||
+           (t > timestep_pressure_2)){
+
             alpha_p = 1.0 - kappa_p*(dt/tau_p)*(P_equil - pressure[t]);
+            
             for(int i = 0; i < n_atoms; i++){
                 for(int j = 0; j < NDIM; j++){
                     pos[i][j] = cbrt(alpha_p)*pos[i][j];
                 }
             }
+            // Rescale size of simulation box
+            L = cbrt(alpha_p)*L;
+            
+            // Update forces the next velocity calculation
+            get_forces_AL(f, pos, L, n_atoms);
         }
 
-        // Saving the time trail of changed volume
+        // Save the timetrail of the changing volume
         V[t+1] = alpha_p*V[t];
-        L = cbrt(alpha_p)*L;
-
         printf("Saving timestep: %d /%d\n", t, n_timesteps);
     }
 

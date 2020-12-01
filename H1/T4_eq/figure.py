@@ -25,7 +25,7 @@ y_max = 1500
 
 fig, ax = plt.subplots()
 ax.plot(time, temp, color='blue', label=r"$T(t)$")
-ax.plot([min(time), max(time)], [T_equil, T_equil], color='black', label=r"$T_{solid}=500$ K")
+ax.plot([min(time), max(time)], [T_equil, T_equil], color='black', label=r"$T_{solid}=700^{\circ}$C")
 ax.plot([T_start, T_start], [y_min, y_max], '--',   color='black', label=r"$t_{start}= 2$ ps",)
 ax.plot([T_tau, T_tau], [y_min, y_max], '--',       color= 'red' , label=r"$\tau_{t}= 200$ dt")
 
@@ -79,3 +79,11 @@ ax.legend(fontsize='16')
 
 plt.savefig('figure/volume_equil_T700.pdf', format='pdf', bbox_inches='tight')
 plt.show()
+
+#%%
+
+P_average = np.zeros(len(pressure))
+for i in range(len(P_average)):
+    P_average[i] = np.sum(pressure[0:i])/i
+    
+    
