@@ -67,7 +67,8 @@ int main(){
     double temperature[length_saved];
     double pressure[length_saved];
 
-    // Number save all
+    // Number save all trails
+    // Both position and velocity
     int all_dim = NDIM*n_atoms;
     double q_trail[length_saved][all_dim];
     double v_trail[length_saved][all_dim];
@@ -88,6 +89,8 @@ int main(){
     for(int t = 1; t < n_timesteps + 1; t++){
         verlet_timestep(pos, v, f, n_atoms, dt, m_al, L);
 
+        // Only save every other time step
+        // Set by the save_every variable
         if (t%save_every == 0){
             kinetic_energy[count] = get_kinetic_energy(v, n_atoms, m_al);
             potential_energy[count] = get_energy_AL(pos, L, n_atoms);
@@ -97,6 +100,7 @@ int main(){
             pressure[count] =  (TO_GPA/V)*(n_atoms*KB*temperature[count] + virial[count]);
 
                 
+            // Saving all the time trails
             for(int i = 0; i < n_atoms; i++){
                 q_trail[count][3*i + 0] = pos[i][0];
                 q_trail[count][3*i + 1] = pos[i][1];

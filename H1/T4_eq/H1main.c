@@ -107,7 +107,7 @@ int main(){
 
     // Values for pressure equilibration
     double P_equil      = 1e-4;       // 1e-4 GPa = 1bar 
-    double bulk_modulus = 62.0;       // 62 - 102 GPa
+    double bulk_modulus = 72.0;       
     double kappa_p      = 1.0/bulk_modulus;
     double tau_p        = 500.0*dt;
     double alpha_p      = 1.0;
