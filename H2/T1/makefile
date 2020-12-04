@@ -8,7 +8,7 @@ CC ?= gcc
 PROGRAM = $(MAIN)
 
 # Include all your object files
-OBJECTS = $(MAIN).o 
+OBJECTS = $(MAIN).o init_gsl.o 
 
 # Libraries to be included 
 LIBS = \
@@ -18,8 +18,8 @@ LIBS = \
 
 # Standard run for make
 CFLAGS = \
-		 -O3 \
-		 -Wall 
+		 -O1 
+		 #-Wall \ 
 		 #-Werror \
 		 #-pedantic
 # I consider to include these flags to be good practice  
