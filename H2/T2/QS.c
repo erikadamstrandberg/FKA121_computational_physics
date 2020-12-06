@@ -96,4 +96,31 @@ int main()
     
     local_energy(E_l, &alpha, N, x1, y1, z1, x2, y2, z2);
     print_markov(E_l, N, x1, y1, z1, x2, y2, z2, "markov_chaimarkov_chain");
+
+
+    // main2 
+    double mean_E_l = 0.0;
+    double sigma2_E_l = 0.0;
+
+    for(int i = 0; i < N; i++)
+    {
+        mean_E_l += E_l[i];
+        sigma2_E_l += pow(E_l[i],2);
+    }
+    mean_E_l = mean_E_l/N;
+    sigma2_E_l = sigma2_E_l/N - pow(mean_E_l, 2);
+    
+    printf("%f\n", mean_E_l);
+    printf("%f\n", sigma2_E_l);
+
+    int k = 40;
+    double phi[k];
+
+    for(int i = 0; i < N-k; i++)
+    {
+        E_l[k+i]-E_l[]
+    }
+
+
+
 }
