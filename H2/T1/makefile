@@ -8,7 +8,7 @@ CC ?= gcc
 PROGRAM = $(MAIN)
 
 # Include all your object files
-OBJECTS = $(MAIN).o init_gsl.o 
+OBJECTS = $(MAIN).o init_gsl.o local_energy.o 
 
 # Libraries to be included 
 LIBS = \
@@ -18,7 +18,7 @@ LIBS = \
 
 # Standard run for make
 CFLAGS = \
-		 -O1 
+		 -O3 
 		 #-Wall \ 
 		 #-Werror \
 		 #-pedantic

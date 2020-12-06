@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include <string.h>
 
 // GSL for random number generation
 #include <gsl/gsl_rng.h>
@@ -14,64 +14,25 @@
 
 // Includes from objective files
 #include "init_gsl.h"
+#include "local_energy.h"
 
-void weight(double *w, double *alpha, 
-            double *x1, double *y1, double *z1, double *x2, double *y2, double *z2)
+void print_markov(double *E_l, int N,
+                  double *x1, double *y1, double *z1, double *x2, double *y2, double *z2,
+                  char*filename)
 {
-    double *r1 = malloc(sizeof(double));
-    double *r2 = malloc(sizeof(double));
-    double *r12 = malloc(sizeof(double));
-    
-    *r1  = sqrt(pow(*x1,2)       + pow(*y1,2)       + pow(*z1,2));
-    *r2  = sqrt(pow(*x2,2)       + pow(*y2,2)       + pow(*z2,2));
-    *r12 = sqrt(pow((*x2-*x1),2) + pow((*y2-*y1),2) + pow((*z2-*z1),2));
-    
-    *w = pow(exp(-2.0*(*r1))*exp(-2.0*(*r2))*exp((*r12)/(2.0*(1.0+*alpha*(*r12)))), 2);
+    char *filename_csv = malloc((strlen(filename) + 4)*sizeof(char));
 
-    free(r1);
-    free(r2);
-    free(r12);
-    r1 = NULL;
-    r2 = NULL;
-    r12 = NULL;
-    // jag älskar dig
+    strcpy(filename_csv, filename);
+    strcat(filename_csv, ".csv");
 
-}
-
-void local_energy(double *E_l, double *alpha, int N, 
-                  double *x1, double *y1, double *z1, double *x2, double *y2, double *z2)
-{
-    double *r1 = malloc(sizeof(double));
-    double *r2 = malloc(sizeof(double));
-    double *r12 = malloc(sizeof(double));
-    double *snd_term = malloc(sizeof(double));
-
-    for (int i = 0; i < N; i++)
+    FILE *mc = fopen(filename_csv, "w");
+    for(int i = 0; i < N; i++)
     {
-        *r1  = sqrt(pow(x1[i],2)       + pow(y1[i],2)       + pow(z1[i],2));
-        *r2  = sqrt(pow(x2[i],2)      + pow(y2[i],2)     + pow(z2[i],2));
-        *r12 = sqrt(pow((x2[i]-x1[i]),2) + pow((y2[i]-y1[i]),2) + pow((z2[i]-z1[i]),2));
-
-        *snd_term = (((*r2)*x1[i]-(*r1)*x2[i])*(x1[i]-x2[i])+
-                     ((*r2)*y1[i]-(*r1)*y2[i])*(y1[i]-y2[i])+
-                     ((*r2)*z1[i]-(*r1)*z2[i])*(z1[i]-z2[i]))
-                    /((*r1)*(*r2)*(*r12)*pow((1+(*alpha)*(*r12)),2));
-
-        E_l[i] = -4.0 + (*snd_term) -1.0/((*r12)*pow((1.0 + (*alpha)*(*r12)),3)) 
-           -1.0/(4.0*pow((1.0 + (*alpha)*(*r12)),4)) + 1.0/(*r12); 
-
+       fprintf(mc, "%f,%f,%f,%f,%f,%f,%f\n", x1[i], y1[i], z1[i], x2[i], y2[i], z2[i], E_l[i]);
     }
-
-    free(r1);
-    free(r2);
-    free(r12);
-    free(snd_term);
-    r1 = NULL;
-    r2 = NULL;
-    r12 = NULL;
-    snd_term = NULL;
-
+    fclose(mc);
 }
+
 // Main 
 int main()
 {
@@ -150,14 +111,5 @@ int main()
     printf("%f\n", (double) accept/((double) N));
     
     local_energy(E_l, &alpha, N, x1, y1, z1, x2, y2, z2);
-   
-
-    FILE *mc = fopen("markov_chain.csv", "w");
-    for(int i = 0; i < N; i++)
-    {
-       fprintf(mc, "%f,%f,%f,%f,%f,%f,%f\n", x1[i], y1[i], z1[i], x2[i], y2[i], z2[i], E_l[i]);
-    }
-    fclose(mc);
+    print_markov(E_l, N, x1, y1, z1, x2, y2, z2, "markov_chaimarkov_chain");
 }
-
-
