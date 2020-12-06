@@ -14,6 +14,7 @@
 
 // Includes from objective files
 #include "init_gsl.h"
+
 void weight(double *w, double *alpha, 
             double *x1, double *y1, double *z1, double *x2, double *y2, double *z2)
 {
@@ -33,6 +34,37 @@ void weight(double *w, double *alpha,
     r1 = NULL;
     r2 = NULL;
     r12 = NULL;
+
+}
+
+void local_energy(double *E_l, double *alpha, 
+                  double *x1, double *y1, double *z1, double *x2, double *y2, double *z2)
+{
+    double *r1 = malloc(sizeof(double));
+    double *r2 = malloc(sizeof(double));
+    double *r12 = malloc(sizeof(double));
+    double *snd_term = malloc(sizeof(double));
+    
+    *r1  = sqrt(pow(*x1,2)       + pow(*y1,2)       + pow(*z1,2));
+    *r2  = sqrt(pow(*x2,2)       + pow(*y2,2)       + pow(*z2,2));
+    *r12 = sqrt(pow((*x2-*x1),2) + pow((*y2-*y1),2) + pow((*z2-*z1),2));
+    
+    *snd_term = (((*r2)*(*x1)-(*r1)*(*x2))*((*x1)-(*x2))+
+                 ((*r2)*(*y1)-(*r1)*(*y2))*((*y1)-(*y2))+
+                 ((*r2)*(*z1)-(*r1)*(*z2))*((*z1)-(*z2)))
+                /((*r1)*(*r2)*(*r12)*pow((1+(*alpha)*(*r12)),2));
+
+    *E_l = -4.0 + (*snd_term) -1.0/((*r12)*pow((1.0 + (*alpha)*(*r12)),3)) 
+           -1.0/(4.0*pow((1.0 + (*alpha)*(*r12)),4)) + 1.0/(*r12); 
+
+    free(r1);
+    free(r2);
+    free(r12);
+    free(snd_term);
+    r1 = NULL;
+    r2 = NULL;
+    r12 = NULL;
+    snd_term = NULL;
 
 }
 // Main 
@@ -65,6 +97,8 @@ int main()
     double w_t;
     double delta = 1.0;
     int accept = 0;
+
+    double E_l[N];
 
     x1[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
     y1[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
@@ -109,10 +143,15 @@ int main()
     }
     printf("%f\n", (double) accept/((double) N));
     
+    for(int i = 0; i < N; i++)
+    {
+        local_energy(&E_l[i], &alpha, &x1[i], &y1[i], &z1[i], &x2[i], &y2[i], &z2[i]);
+    }
+
     FILE *mc = fopen("markov_chain.csv", "w");
     for(int i = 0; i < N; i++)
     {
-        fprintf(mc, "%f,%f,%f,%f,%f,%f\n", x1[i], y1[i], z1[i], x2[i], y2[i], z2[i]);
+        fprintf(mc, "%f,%f,%f,%f,%f,%f,%f\n", x1[i], y1[i], z1[i], x2[i], y2[i], z2[i], E_l[i]);
     }
     fclose(mc);
 }
