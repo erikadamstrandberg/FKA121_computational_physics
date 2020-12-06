@@ -8,7 +8,7 @@ CC ?= gcc
 PROGRAM = $(MAIN)
 
 # Include all your object files
-OBJECTS = $(MAIN).o init_gsl.o local_energy.o 
+OBJECTS = $(MAIN).o init_gsl.o local_energy.o print_to_file.o 
 
 # Libraries to be included 
 LIBS = \
