@@ -24,7 +24,9 @@ int main(){
     for (int i = 0; i < N; i++){
         x[i] = gsl_ran_gaussian(Q, 1);
     }
- 
+
+
+
     FILE *fp = fopen("gaussian.csv", "w");
     for(int i = 0; i < N; i++){
         fprintf(fp, "%f\n", x[i]);
