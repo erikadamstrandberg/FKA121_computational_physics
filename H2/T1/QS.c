@@ -34,6 +34,7 @@ void weight(double *w, double *alpha,
     r1 = NULL;
     r2 = NULL;
     r12 = NULL;
+    // jag älskar dig
 
 }
 
