@@ -11,11 +11,11 @@
 // GSL for random number generation
 #include <gsl/gsl_rng.h>
 
-
 // Includes from objective files
 #include "init_gsl.h"
 #include "local_energy.h"
 #include "print_to_file.h"
+#include "error_estimate.h"
 
 // Main 
 int main()
@@ -28,17 +28,20 @@ int main()
     rand = gsl_rng_uniform(gsl_rand);
 
     double alpha = 0.1;
-    int N = 20000;
-    double x1[N];
-    double y1[N];
-    double z1[N];
+    int N_tot = 120000;
+    int burn_in = 2000;
+    int N = N_tot - burn_in;
+
+    double x1[N_tot];
+    double y1[N_tot];
+    double z1[N_tot];
     double x1_t;
     double y1_t;
     double z1_t;
     
-    double x2[N];
-    double y2[N];
-    double z2[N];
+    double x2[N_tot];
+    double y2[N_tot];
+    double z2[N_tot];
     double x2_t;
     double y2_t;
     double z2_t;
@@ -58,8 +61,7 @@ int main()
     y2[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
     z2[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
 
-
-    for(int i = 0; i < N; i++)
+    for(int i = 0; i < N_tot; i++)
     {
         x1_t = x1[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
         y1_t = y1[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
@@ -92,8 +94,39 @@ int main()
         }
     }
 
-    printf("%f\n", (double) accept/((double) N));
+    printf("Acceptance ratio: %f\n", (double) accept/((double) N));
     
-    local_energy(E_l, &alpha, N, x1, y1, z1, x2, y2, z2);
-    print_markov(E_l, N, x1, y1, z1, x2, y2, z2, "markov_chain");
+
+    local_energy(E_l, &alpha, N_tot, burn_in, x1, y1, z1, x2, y2, z2);
+    print_markov(N_tot, x1, y1, z1, x2, y2, z2, "markov_chain");
+    print_1d_array(E_l, N, "local_energy");
+    
+    double mean_E_l = 0.0;
+    double sigma2_E_l = 0.0;
+    mean(&mean_E_l, E_l, 0, N);
+    sigma2(&sigma2_E_l, E_l, 0, N);
+
+    int k = 30;
+    double phi[k];    
+    correlation_function(phi, E_l, &sigma2_E_l, N, k);
+    print_1d_array(phi, k, "correlation");
+
+    int B = 800;
+    double ns_b[B];
+    block_averaging(ns_b, E_l, &sigma2_E_l, N, B);
+    print_1d_array(ns_b, B, "block_average");
+
+    double ns;
+    double limit = 0.135;
+    int p = 0;
+    while (phi[p] > limit)
+    {
+        p += 1;
+    }
+
+    printf("Mean of E_l: %f\n", mean_E_l);
+    printf("Variance of E_l: %f\n", sigma2_E_l);
+    printf("Statistical inefficiency: %d\n\n", p);
+    printf("Estimate: %f +- %f\n",  mean_E_l, sqrt(sigma2_E_l)/(sqrt((double) N/(double) p)));
 }
+

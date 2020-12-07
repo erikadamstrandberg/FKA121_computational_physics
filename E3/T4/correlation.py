@@ -36,6 +36,7 @@ how_many = 500
 ks = np.arange(0,how_many,1)
 
 omega = np.zeros(how_many)
+
 for k in ks:
     forward = array[k:N] - (1/(N-k))*np.sum(array[k:N])
     lag = array[0:N-k] - (1/(N-k))*np.sum(array[0:N-k])

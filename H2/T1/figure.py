@@ -137,3 +137,5 @@ plt.show()
 
 E = (1/N)*np.sum(El)
 
+
+
