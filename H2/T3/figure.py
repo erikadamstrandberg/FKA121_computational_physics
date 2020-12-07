@@ -4,22 +4,77 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-#%% Uncorrelated! With only one electrion wavefunctions
+#%%
 
-array = np.genfromtxt('../T2/local_energy.csv', delimiter=',')
+array = np.genfromtxt('../T3/data/finalvalue_005.csv', delimiter=',')
 
-El = array
-fig, ax = plt.subplots()
-ax.plot(El)
+E_l = array[0]
+sigma2 = array[1]
+alpha = array[2]
+N = array[3]
+ns = array[4]
+
+pm = np.sqrt(sigma2)/(np.sqrt(N/ns))
+
+print(f"E_l = <E_l> +- sigma/sqrt(N/ns) for alpha = {alpha}")
+print(f"E_l = {E_l} +- {pm}")
 
 #%%
-array = np.genfromtxt('../T2/correlation.csv', delimiter=',')
 
-fig, ax = plt.subplots()
-ax.plot(array)
+array = np.genfromtxt('../T3/data/finalvalue_010.csv', delimiter=',')
+
+E_l = array[0]
+sigma2 = array[1]
+alpha = array[2]
+N = array[3]
+ns = array[4]
+
+pm = np.sqrt(sigma2)/(np.sqrt(N/ns))
+
+print(f"E_l = <E_l> +- sigma/sqrt(N/ns) for alpha = {alpha}")
+print(f"E_l = {E_l} +- {pm}")
 
 #%%
-array = np.genfromtxt('../T2/block_average.csv', delimiter=',')
 
-fig, ax = plt.subplots()
-ax.plot(array)
+array = np.genfromtxt('../T3/data/finalvalue_015.csv', delimiter=',')
+
+E_l = array[0]
+sigma2 = array[1]
+alpha = array[2]
+N = array[3]
+ns = array[4]
+
+pm = np.sqrt(sigma2)/(np.sqrt(N/ns))
+
+print(f"E_l = <E_l> +- sigma/sqrt(N/ns) for alpha = {alpha}")
+print(f"E_l = {E_l} +- {pm}")
+
+#%%
+
+array = np.genfromtxt('../T3/data/finalvalue_020.csv', delimiter=',')
+
+E_l = array[0]
+sigma2 = array[1]
+alpha = array[2]
+N = array[3]
+ns = array[4]
+
+pm = np.sqrt(sigma2)/(np.sqrt(N/ns))
+
+print(f"E_l = <E_l> +- sigma/sqrt(N/ns) for alpha = {alpha}")
+print(f"E_l = {E_l} +- {pm}")
+
+#%%
+
+array = np.genfromtxt('../T3/data/finalvalue_025.csv', delimiter=',')
+
+E_l = array[0]
+sigma2 = array[1]
+alpha = array[2]
+N = array[3]
+ns = array[4]
+
+pm = np.sqrt(sigma2)/(np.sqrt(N/ns))
+
+print(f"E_l = <E_l> +- sigma/sqrt(N/ns) for alpha = {alpha}")
+print(f"E_l = {E_l} +- {pm}")

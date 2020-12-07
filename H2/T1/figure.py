@@ -32,23 +32,53 @@ for i in range(len(r1)):
 
 
 #%% Bins for histogram
-step_bin = 0.1
+step_bin = 0.05
 start_bin = -1
 stopp_bin = 1 + step_bin
 b = np.arange(start_bin, stopp_bin, step_bin)
 
-fig, ax = plt.subplots()
-ax.hist(uniform, bins=b, density=True)
+x = np.array([-1,1])
+y = np.array([1/2,1/2])
 
+fig, ax = plt.subplots()
+ax.hist(uniform, bins=b, density=True, label=r'$x=\cos(\theta)$')
+ax.plot(x,y, '--', color='black', label=r'$1/2$', linewidth=2)
+
+ax.set_title(r'Distribution of $x=\cos(\theta)$ for $\Psi_{un}$', fontsize='16')
+ax.set_xlabel(r'$x$', fontsize='16')
+ax.set_ylabel(r'$\rho$', fontsize='16')
+
+ax.set_ylim([0,0.8])
+
+ax.grid()
+ax.legend(fontsize='16', loc='upper right')
+
+plt.savefig('../T1/figure/uniform_uncorrelated.pdf', format='pdf', bbox_inches='tight')
+plt.show()
 
 #%% Bins for histogram
-step_bin = 0.1
+step_bin = 0.05
 start_bin = 0
 stopp_bin = np.pi + step_bin
 b = np.arange(start_bin, stopp_bin, step_bin)
 
+x = np.linspace(0,np.pi,500)
+y = (1/2)*np.sin(x)
+
+
 fig, ax = plt.subplots()
-ax.hist(theta, bins=b, density=True)
+ax.hist(theta, bins=b, density=True, label=r'$\theta$')
+ax.plot(x,y, '--', color='black', label=r'$1/2\sin(\theta)$', linewidth=2)
+
+ax.set_title(r'Distribution of $\theta$ for $\Psi_{un}$', fontsize='16')
+ax.set_xlabel(r'$\theta$', fontsize='16')
+ax.set_ylabel(r'$\rho$', fontsize='16')
+
+ax.grid()
+ax.legend(fontsize='16', loc='upper left')
+
+plt.savefig('../T1/figure/theta_uncorrelated.pdf', format='pdf', bbox_inches='tight')
+plt.show()
 
 
 #%% Correlated data
@@ -84,22 +114,52 @@ for i in range(len(r1)):
 
 
 #%% Bins for histogram
-step_bin = 0.1
+step_bin = 0.05
 start_bin = -1
 stopp_bin = 1 + step_bin
 b = np.arange(start_bin, stopp_bin, step_bin)
 
+x = np.array([-1,1])
+y = np.array([1/2,1/2])
+
 fig, ax = plt.subplots()
-ax.hist(uniform, bins=b, density=True)
+ax.hist(uniform, bins=b, density=True, label=r'$x=\cos(\theta)$')
+ax.plot(x,y, '--', color='black', label=r'$1/2$', linewidth=2)
+
+ax.set_title(r'Distribution of $x=\cos(\theta)$', fontsize='16')
+ax.set_xlabel(r'$x$', fontsize='16')
+ax.set_ylabel(r'$\rho$', fontsize='16')
+
+ax.grid()
+ax.legend(fontsize='16', loc='upper right')
+
+plt.savefig('../T1/figure/uniform_correlated.pdf', format='pdf', bbox_inches='tight')
+plt.show()
 
 #%% Bins for histogram
-step_bin = 0.1
+step_bin = 0.05
 start_bin = 0
 stopp_bin = np.pi + step_bin
 b = np.arange(start_bin, stopp_bin, step_bin)
 
+x = np.linspace(0,np.pi,500)
+y = (1/2)*np.sin(x)
+
+
 fig, ax = plt.subplots()
-ax.hist(theta, bins=b, density=True)
+ax.hist(theta, bins=b, density=True, label=r'$\theta$')
+ax.plot(x,y, '--', color='black', label=r'$1/2\sin(\theta)$', linewidth=2)
+
+ax.set_title(r'Distribution of $\theta$', fontsize='16')
+ax.set_xlabel(r'$\theta$', fontsize='16')
+ax.set_ylabel(r'$\rho$', fontsize='16')
+
+ax.grid()
+ax.legend(fontsize='16', loc='upper left')
+
+plt.savefig('../T1/figure/theta_correlated.pdf', format='pdf', bbox_inches='tight')
+plt.show()
+
 
 #%% Centeral mean field approx. from Hartree
 Z_unscreened = 2
@@ -119,18 +179,33 @@ b = np.arange(start_bin, stopp_bin, step_bin)
 rho_unscreened = rho(r, Z_unscreened)
 rho_optimized = rho(r, Z_optimized)
 fig, ax = plt.subplots()
-ax.plot(r, rho_unscreened, '--', color='blue', label=r'$\rho_{unscreened}$')
-ax.plot(r, rho_optimized , '--', color='red', label=r'$\rho_{screened}$')
-ax.hist(r2, bins=b, density=True)
+ax.hist(r1, bins=b, density=True, label=r'$\rho(r_1)$')
+ax.plot(r, rho_unscreened, '--', color='black', label=r'$\rho_{unscreened}(r)$', linewidth=2)
+ax.plot(r, rho_optimized , '--', color='red', label=r'$\rho_{screened}(r)$', linewidth=2)
 
-ax.set_title(r'Probability of finding a electron', fontsize='16')
+ax.set_title(r'Benchmarking $\rho(r_1)$ sampling, $\alpha=0.1$', fontsize='16')
 ax.set_xlabel(r'$r$ [$Å$]', fontsize='16')
 ax.set_ylabel(r'$\rho$', fontsize='16')
 
 ax.grid()
 ax.legend(fontsize='16', loc='upper right')
 
-plt.savefig('../T1/figure/probability_benchmark.pdf', format='pdf', bbox_inches='tight')
+plt.savefig('../T1/figure/probability_benchmark_r1.pdf', format='pdf', bbox_inches='tight')
+plt.show()
+
+fig, ax = plt.subplots()
+ax.hist(r2, bins=b, density=True, label=r'$\rho(r_2)$')
+ax.plot(r, rho_unscreened, '--', color='black', label=r'$\rho_{unscreened}(r)$', linewidth=2)
+ax.plot(r, rho_optimized , '--', color='red', label=r'$\rho_{screened}(r)$', linewidth=2)
+
+ax.set_title(r'Benchmarking $\rho(r_2)$ sampling, $\alpha=0.1$', fontsize='16')
+ax.set_xlabel(r'$r$ [$Å$]', fontsize='16')
+ax.set_ylabel(r'$\rho$', fontsize='16')
+
+ax.grid()
+ax.legend(fontsize='16', loc='upper right')
+
+plt.savefig('../T1/figure/probability_benchmark_r2.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
 #%%

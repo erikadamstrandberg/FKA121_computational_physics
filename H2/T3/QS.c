@@ -27,9 +27,9 @@ int main()
     double rand;
     rand = gsl_rng_uniform(gsl_rand);
 
-    double alpha = 0.1;
+    double alpha = 0.05;
     int N_tot = 120000;
-    int burn_in = 2000;
+    int burn_in = 4000;
     int N = N_tot - burn_in;
 
     double x1[N_tot];
@@ -116,17 +116,47 @@ int main()
     block_averaging(ns_b, E_l, &sigma2_E_l, N, B);
     print_1d_array(ns_b, B, "block_average");
 
+
     double ns;
+
+    // Estimate ns from correlation function
     double limit = 0.135;
-    int p = 0;
-    while (phi[p] > limit)
+    double ns_from_corr;
+    int index_after = 0;
+    while (phi[index_after] > limit)
     {
-        p += 1;
+        index_after += 1;
     }
+
+    ns_from_corr = index_after*(phi[index_after-1]-limit)/(phi[index_after-1]-phi[index_after]) + 
+                  (index_after-1)*(limit-phi[index_after])/(phi[index_after-1]-phi[index_after]); 
+
+    // Estimate from block average
+    double ns_from_block = 0;
+    int blocks_from_end = 200;
+    for(int i = B-blocks_from_end; i < B; i++)
+    {
+        ns_from_block += ns_b[i];
+    }
+    ns_from_block = ns_from_block/blocks_from_end;
+
+    if (ns_from_block > ns_from_corr)
+    {
+        ns = ns_from_block;
+    }
+    else 
+    {
+        ns = ns_from_corr;
+    }
+
+
+    FILE *estimates = fopen("finalvalue.csv", "w"); 
+    fprintf(estimates, "%f,%f,%f,%d,%f\n", mean_E_l, sigma2_E_l, alpha, N, ns);
+    fclose(estimates);
 
     printf("Mean of E_l: %f\n", mean_E_l);
     printf("Variance of E_l: %f\n", sigma2_E_l);
-    printf("Statistical inefficiency: %d\n\n", p);
-    printf("Estimate: %f +- %f\n",  mean_E_l, sqrt(sigma2_E_l)/(sqrt((double) N/(double) p)));
+    printf("Statistical inefficiency: %f\n\n", ns);
+    printf("Estimate: %f +- %f\n",  mean_E_l, sqrt(sigma2_E_l)/(sqrt(N/ns)));
 }
 

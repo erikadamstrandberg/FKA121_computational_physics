@@ -32,8 +32,8 @@ int main()
     rand = gsl_rng_uniform(gsl_rand);
 
     double alpha = 0.1;
-    int N_tot = 50000;
-    int burn_in = 2000;
+    int N_tot = 120000;
+    int burn_in = 1000;
     int N = N_tot - burn_in;
 
     double x1[N_tot];
@@ -98,9 +98,6 @@ int main()
         }
     }
 
-    printf("Acceptance ratio: %f\n", (double) accept/((double) N));
-    
-
     local_energy(E_l, &alpha, N_tot, burn_in, x1, y1, z1, x2, y2, z2);
     print_markov(N_tot, x1, y1, z1, x2, y2, z2, "markov_chain");
     print_1d_array(E_l, N, "local_energy");
@@ -115,23 +112,53 @@ int main()
     correlation_function(phi, E_l, &sigma2_E_l, N, k);
     print_1d_array(phi, k, "correlation");
 
-    int B = 120;
+    int B = 500;
     double ns_b[B];
     block_averaging(ns_b, E_l, &sigma2_E_l, N, B);
     print_1d_array(ns_b, B, "block_average");
 
+
+
     double ns;
+
+    // Estimate ns from correlation function
     double limit = 0.135;
-    int p = 0;
-    while (phi[p] > limit)
+    double ns_from_corr;
+    int index_after = 0;
+    while (phi[index_after] > limit)
     {
-        p += 1;
+        index_after += 1;
     }
 
+    ns_from_corr = index_after*(phi[index_after-1]-limit)/(phi[index_after-1]-phi[index_after]) + 
+                  (index_after-1)*(limit-phi[index_after])/(phi[index_after-1]-phi[index_after]); 
+
+    // Estimate from block average
+    double ns_from_block = 0;
+    int blocks_from_end = 200;
+    for(int i = B-blocks_from_end; i < B; i++)
+    {
+        ns_from_block += ns_b[i];
+    }
+    ns_from_block = ns_from_block/blocks_from_end;
+
+    if (ns_from_block > ns_from_corr)
+    {
+        ns = ns_from_block;
+    }
+    else 
+    {
+        ns = ns_from_corr;
+    }
+
+    printf("Acceptance ratio: %f\n", (double) accept/((double) N));
+    printf("Alpha: %f\n", alpha);
     printf("Mean of E_l: %f\n", mean_E_l);
     printf("Variance of E_l: %f\n", sigma2_E_l);
-    printf("Statistical inefficiency: %d\n\n", p);
-    printf("Estimate: %f +- %f\n",  mean_E_l, sqrt(sigma2_E_l)/(sqrt((double) N/(double) p)));
+    printf("Ns from corr: %f\n", ns_from_corr);
+    printf("Ns from block: %f\n", ns_from_block);
+    printf("Statistical inefficiency: %f\n\n", ns);
+    printf("Estimate: %f +- %f\n",  mean_E_l, sqrt(sigma2_E_l)/(sqrt(N/ns)));
 }
 
 void mean(double *mean, double *array, int start, int stop)
