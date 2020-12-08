@@ -9,8 +9,13 @@ import matplotlib.pyplot as plt
 array = np.genfromtxt('../T2/data/local_energy_bad_initial.csv', delimiter=',')
 
 El = array
+
+x = np.array([500, 500])
+y = np.array([-4,-2])
+
 fig, ax = plt.subplots()
 ax.plot(El, color='blue', label=r'$E_L[R_i]$')
+ax.plot(x,y,'--', color='red', label=r'$N_{eq} = 500$', linewidth=3)
 
 ax.set_title(r'Local energy with bad initial step', fontsize='16')
 ax.set_xlabel(r'$i$', fontsize='16')
@@ -118,12 +123,35 @@ ax.set_ylabel(r'$E_L$ [$a.u.$]', fontsize='16')
 ax.set_ylim([-3.2,-2.5])
 
 ax.grid()
-ax.legend(fontsize='16', loc='upper left')
+ax.legend(fontsize='16', loc='upper right')
 
 plt.savefig('../T2/figure/energy_good_inital_burn_in.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
+#%%
 
+array = np.genfromtxt('../T2/data/local_energy_long.csv', delimiter=',')
+El = array
+
+El_avg = np.zeros(len(El))
+for i in range(len(El)):
+    El_avg[i] = np.sum(El[0:i])/(i+1)
+
+fig, ax = plt.subplots()   
+ax.plot(El_avg, color='orange', label=r'$E_L[R_i]$', linewidth=2)
+
+ax.set_title(r'Calculated energy, $E_L$, with random initial and burn in $N_{eq} = 1000$', fontsize='16')
+ax.set_xlabel(r'$i$', fontsize='16')
+ax.set_ylabel(r'$E_L$ [$a.u.$]', fontsize='16')
+
+ax.set_ylim([-2.9,-2.84])
+
+ax.grid()
+ax.legend(fontsize='16', loc='upper right')
+
+plt.savefig('../T2/figure/energy_good_inital_long.pdf', format='pdf', bbox_inches='tight')
+plt.show()
+    
 #%%
 array = np.genfromtxt('../T2/data/correlation.csv', delimiter=',')
 N = len(array)

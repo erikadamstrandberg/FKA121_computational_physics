@@ -184,7 +184,7 @@ ax.plot(r, rho_unscreened, '--', color='black', label=r'$\rho_{unscreened}(r)$',
 ax.plot(r, rho_optimized , '--', color='red', label=r'$\rho_{screened}(r)$', linewidth=2)
 
 ax.set_title(r'Benchmarking $\rho(r_1)$ sampling, $\alpha=0.1$', fontsize='16')
-ax.set_xlabel(r'$r$ [$Å$]', fontsize='16')
+ax.set_xlabel(r'$r$ [$a_0$]', fontsize='16')
 ax.set_ylabel(r'$\rho$', fontsize='16')
 
 ax.grid()
@@ -199,7 +199,7 @@ ax.plot(r, rho_unscreened, '--', color='black', label=r'$\rho_{unscreened}(r)$',
 ax.plot(r, rho_optimized , '--', color='red', label=r'$\rho_{screened}(r)$', linewidth=2)
 
 ax.set_title(r'Benchmarking $\rho(r_2)$ sampling, $\alpha=0.1$', fontsize='16')
-ax.set_xlabel(r'$r$ [$Å$]', fontsize='16')
+ax.set_xlabel(r'$r$ [$a_0$]', fontsize='16')
 ax.set_ylabel(r'$\rho$', fontsize='16')
 
 ax.grid()

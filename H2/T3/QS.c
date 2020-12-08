@@ -23,15 +23,14 @@ int main()
     // Initializes GSL random number generation
     gsl_rng* gsl_rand = init_gsl();
 
-    // Pick a random number
-    double rand;
-    rand = gsl_rng_uniform(gsl_rand);
-
-    double alpha = 0.05;
+    // Initializing the simulation
+    double alpha = 0.10;
     int N_tot = 120000;
     int burn_in = 4000;
     int N = N_tot - burn_in;
+    double E_l[N];
 
+    // Variables for generating the Markovs chain
     double x1[N_tot];
     double y1[N_tot];
     double z1[N_tot];
@@ -46,21 +45,26 @@ int main()
     double y2_t;
     double z2_t;
 
+    // Variables for storing the weight function
     double w;
     double w_t;
+
+    // Setting the step length  
     double delta = 1.0;
+
+    // Recordning the acceptance ratio
     int accept = 0;
 
-    double E_l[N];
 
+    // Picking random first step 
     x1[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
     y1[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
     z1[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
-
     x2[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
     y2[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
     z2[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
 
+    // Generation of Markov chain with the Metropolis algorithm
     for(int i = 0; i < N_tot; i++)
     {
         x1_t = x1[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
@@ -97,20 +101,24 @@ int main()
     printf("Acceptance ratio: %f\n", (double) accept/((double) N));
     
 
+    // Calculates and writes the local energy and the Markov chain
     local_energy(E_l, &alpha, N_tot, burn_in, x1, y1, z1, x2, y2, z2);
     print_markov(N_tot, x1, y1, z1, x2, y2, z2, "markov_chain");
     print_1d_array(E_l, N, "local_energy");
     
+    // Calculation of mean and variance of E_l
     double mean_E_l = 0.0;
     double sigma2_E_l = 0.0;
     mean(&mean_E_l, E_l, 0, N);
     sigma2(&sigma2_E_l, E_l, 0, N);
 
+    // Caculate and writes the correlation function
     int k = 30;
     double phi[k];    
     correlation_function(phi, E_l, &sigma2_E_l, N, k);
     print_1d_array(phi, k, "correlation");
 
+    // Calculates and writes the block averaging
     int B = 800;
     double ns_b[B];
     block_averaging(ns_b, E_l, &sigma2_E_l, N, B);
@@ -149,7 +157,7 @@ int main()
         ns = ns_from_corr;
     }
 
-
+    // Prints the error bars for the calculations
     FILE *estimates = fopen("finalvalue.csv", "w"); 
     fprintf(estimates, "%f,%f,%f,%d,%f\n", mean_E_l, sigma2_E_l, alpha, N, ns);
     fclose(estimates);
