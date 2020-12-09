@@ -39,11 +39,11 @@ int main(){
     double mu_high = 1.0/48.5e-3;
 
 
-    double T = 500;                // total simulation time [ms]
+    double T = 8000;                // total simulation time [ms]
     double dt = 0.001;            // timestep [ms] 
     int N = (int) (T/dt);
     int nburn =  (int) (N/10.0);   
-    double c0 = exp(-mu_low*dt);    
+    double c0 = exp(-mu_high*dt);    
     
     double x;    
     double v;
@@ -80,19 +80,44 @@ int main(){
             count_saved += 1;
         }
     }
+
+    int B = 300;
+    int M = (int) (nsaved/B);
+
+    double freq[M];
+    fft_freq(freq, dtau, M);
+    fft_freq_shift(freq, dtau, M);
+
+
+    double vcurrent_block[M];
+    double vfft[M];
+    double vfft_avg[M];
+    for(int i = 0; i < M; i++){
+        vcurrent_block[i] = 0.0;
+        vfft[i] = 0.0;
+        vfft_avg[i] = 0.0;
+    }
+
+    for(int i = 0; i < B; i++){
+        for(int j = 0; j < M; j++){
+            vcurrent_block[j] = vsample[j+i*M];
+        }
+
+        powerspectrum(vcurrent_block, vfft, M); 
+        powerspectrum_shift(vfft, M);
+
+        for(int j = 0; j < M; j++){
+            vfft_avg[j] += vfft[j];
+        }
+    }
     
-    double vfft[nsaved];
-    powerspectrum(vsample, vfft, nsaved); 
-    powerspectrum_shift(vfft, nsaved);
+    for(int i = 0; i < M; i++){
+        vfft_avg[i] = vfft_avg[i]/B;
+    }
 
-    double freq[nsaved];
-    fft_freq(freq, dtau, nsaved);
-    fft_freq_shift(freq, dtau, nsaved);
-
-      
     FILE *ffft = fopen("spectrum.csv", "w");
-    for(int i = 0; i < nsaved; i++){
-        fprintf(ffft, "%f,%f\n", vfft[i], freq[i]);
+    for(int i = 0; i < M; i++){
+        fprintf(ffft, "%f,%f\n", vfft_avg[i], freq[i]);
     }
     fclose(ffft);
 
