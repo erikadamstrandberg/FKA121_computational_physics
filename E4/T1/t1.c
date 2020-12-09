@@ -38,9 +38,10 @@ int main(){
     double mu_high = 1.0/48.5e-3;
 
 
-    double T =  10;                // total simulation time [ms]
+    double T =  1;                // total simulation time [ms]
     double dt = 0.001;            // timestep [ms] 
-    int N = (int) (T/dt);        
+    int N = (int) (T/dt);
+    int nburn =  (int) (N/10);   
     double c0 = exp(-mu_high*dt);    
     
     double x[N+1];    
@@ -50,7 +51,21 @@ int main(){
     v[0] = 0;
 
     double a = -pow(w0,2)*x[0];
+    
+    // run burn in 
+    for(int t = 1; t < nburn+1; t++){
 
+        v[t] = (dt/2.0)*a+sqrt(c0)*v[t-1]+vth*sqrt(1-c0)*gsl_ran_gaussian(Q,1);
+        x[t] = x[t-1] + v[t]*dt;
+        a = -pow(w0,2)*x[t];
+        v[t] = (dt*sqrt(c0)/2.0)*a+sqrt(c0)*v[t]+vth*sqrt(1-c0)*gsl_ran_gaussian(Q,1);
+        
+    }
+
+    x[0] = x[nburn];
+    v[0] = v[nburn];
+    
+    // run production
     for(int t = 1; t < N+1; t++){
 
         v[t] = (dt/2.0)*a+sqrt(c0)*v[t-1]+vth*sqrt(1-c0)*gsl_ran_gaussian(Q,1);
