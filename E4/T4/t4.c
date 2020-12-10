@@ -38,8 +38,7 @@ int main(){
     double mu_low = 1.0/147.3e-3;
     double mu_high = 1.0/48.5e-3;
 
-
-    double T =  500;              // total simulation time [ms]
+    double T = 1280;              // total simulation time [ms]
     double dt = 0.005;            // timestep [ms] 
     int N = (int) (T/dt);
     int nburn =  (int) (N/2);   
@@ -90,7 +89,7 @@ int main(){
     }
 
 
-    int B = 1;
+    int B = 16;
     int M = (int) (N1/B);
 
     double current_block[M];
@@ -116,7 +115,7 @@ int main(){
     }
 
     for(int i = 0; i < M; i++){
-        inverse_avg[i] = inverse_avg[i]/B;
+        inverse_avg[i] = sqrt(inverse_avg[i]/(2*B*M));
     }
 
     double freq[M];
