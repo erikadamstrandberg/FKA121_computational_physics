@@ -22,6 +22,10 @@ phi_low_1ms = phi_low[0:index_1ms]
 t_low_1ms = t_low[0:index_1ms]
 
 fig, ax = plt.subplots()
-ax.plot(t_high_1ms, phi_high_1ms/np.max(phi_high_1ms), label="x")
-ax.plot(t_low_1ms, phi_low_1ms/np.max(phi_low_1ms), label="x")
+ax.plot(t_high_1ms, phi_high_1ms/np.max(phi_high_1ms), label="P = 99.8 kPa")
+ax.plot(t_low_1ms, phi_low_1ms/np.max(phi_low_1ms), label="P = 2.75 kPa")
+ax.set_xlabel("time [ms]")
+ax.set_ylabel(r"$\Phi / \Phi_0$")
+ax.legend()
 
+plt.show()
