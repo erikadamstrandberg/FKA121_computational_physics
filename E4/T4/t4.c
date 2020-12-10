@@ -39,10 +39,10 @@ int main(){
     double mu_high = 1.0/48.5e-3;
 
 
-    double T =  100;                // total simulation time [ms]
-    double dt = 0.001;            // timestep [ms] 
+    double T =  500;              // total simulation time [ms]
+    double dt = 0.005;            // timestep [ms] 
     int N = (int) (T/dt);
-    int nburn =  (int) (N/10);   
+    int nburn =  (int) (N/2);   
     double c0 = exp(-mu_low*dt);    
     
     double x[N+1];    
@@ -90,15 +90,41 @@ int main(){
     }
 
 
-    double inverse[N1];
-    powerspectrum(phi, inverse, N1); 
+    int B = 1;
+    int M = (int) (N1/B);
 
-    double freq[N1];
-    fft_freq(freq, dt, N1);
+    double current_block[M];
+    double inverse[M];
+    double inverse_avg[M];
+    for(int i = 0; i < M; i++){
+        current_block[i] = 0.0;
+        inverse[i] = 0.0;
+        inverse_avg[i] = 0.0;
+    }
+
+    for(int i = 0; i < B; i++){
+        for(int j = 0; j < M; j++){
+            current_block[j] = phi[j+i*M];
+        }
+        
+        powerspectrum(current_block, inverse, M); 
+        
+        for(int j = 0; j < M; j++){
+            inverse_avg[j] += inverse[j];
+        }
+        
+    }
+
+    for(int i = 0; i < M; i++){
+        inverse_avg[i] = inverse_avg[i]/B;
+    }
+
+    double freq[M];
+    fft_freq(freq, dt, M);
 
     FILE *finverse = fopen("power_corr.csv", "w");
-    for(int i = 0; i < N+1; i++){
-        fprintf(finverse, "%f,%f\n", inverse[i], freq[i]);
+    for(int i = 0; i < M; i++){
+        fprintf(finverse, "%f,%f\n", inverse_avg[i], freq[i]);
     }
     fclose(finverse);
     

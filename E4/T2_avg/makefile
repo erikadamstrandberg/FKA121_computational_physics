@@ -18,7 +18,7 @@ LIBS = \
 
 # Standard run for make
 CFLAGS = \
-		 -O1 
+		 -O3 
 		 #-Wall \ 
 		 #-Werror \
 		 #-pedantic

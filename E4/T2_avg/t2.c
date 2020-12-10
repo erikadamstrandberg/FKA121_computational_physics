@@ -43,14 +43,14 @@ int main(){
     double dt = 0.001;            // timestep [ms] 
     int N = (int) (T/dt);
     int nburn =  (int) (N/10.0);   
-    double c0 = exp(-mu_high*dt);    
+    double c0 = exp(-mu_low*dt);    
     
     double x;    
     double v;
     
     // Sampling
-    int ns = 50;
-    int nsaved = (int) (N/50.0);
+    int ns = 25;
+    int nsaved = (int) (N/ns);
     double vsample[nsaved];
     double dtau = ns*dt;
             
@@ -81,7 +81,7 @@ int main(){
         }
     }
 
-    int B = 300;
+    int B = 100;
     int M = (int) (nsaved/B);
 
     double freq[M];
@@ -112,7 +112,7 @@ int main(){
     }
     
     for(int i = 0; i < M; i++){
-        vfft_avg[i] = vfft_avg[i]/B;
+        vfft_avg[i] = vfft_avg[i]/(B*M);
     }
 
     FILE *ffft = fopen("spectrum.csv", "w");
