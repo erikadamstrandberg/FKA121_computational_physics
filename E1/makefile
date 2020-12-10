@@ -1,4 +1,4 @@
-main = E1code4
+main = E1code3
 
 CC ?= gcc # c-compiler
 CFLAGS = # compiler  flags  such as -O3

@@ -22,7 +22,7 @@
 /*************************************************************
  * Macro defines
  *************************************************************/
-#define N_POINTS 255
+#define N_POINTS 300
 #define dt 0.1
 
 /******************************************************************************
@@ -102,7 +102,15 @@ int main(int argc, char **argv)
      * Do the fft
      */
     double fftd_data[N_POINTS];
-    powerspectrum(signal, fftd_data, N_POINTS);
+    fft_forward(signal, fftd_data, N_POINTS); 
+    write_to_file("powerspectrum.csv", fftd_data, frequencies, N_POINTS);
+    
+    double inverse[N_POINTS];
+    fft_inverse(fftd_data, inverse, N_POINTS);
+
+    write_to_file("original.csv", inverse, time_array, N_POINTS);
+
+
     /*
      * Do frequency shift
      */
@@ -112,6 +120,6 @@ int main(int argc, char **argv)
     /*
      * Dump fft and frequencies to file
      */
-    write_to_file("powerspectrum.csv", fftd_data, frequencies, N_POINTS);
+
     return 0;
 }

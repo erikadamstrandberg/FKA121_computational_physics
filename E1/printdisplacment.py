@@ -68,3 +68,8 @@ x_lim = np.array([x_min,x_max])
 y_lim = np.array([y_min,y_max])
 ax.set_xlim(x_lim)
 ax.set_ylim(y_lim)
+
+
+#%%
+
+

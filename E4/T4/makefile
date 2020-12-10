@@ -1,5 +1,5 @@
 # File containing the main function
-MAIN = t1
+MAIN = t4
 
 # Compiler
 CC ?= gcc
@@ -18,7 +18,7 @@ LIBS = \
 
 # Standard run for make
 CFLAGS = \
-		 -O1 
+		 -O3 
 		 #-Wall \ 
 		 #-Werror \
 		 #-pedantic

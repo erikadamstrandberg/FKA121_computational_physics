@@ -75,13 +75,22 @@ void write_to_file(char *fname, double *time_array,
 
 int main()
 {
-    int N = 255; double dt = 0.1;
-    double a = 1.0; double f = 2.0; double phi = 0.0;
+    int N = 300; double dt = 0.1;
+    double a = 1.0; double f = 1.0; double phi = 0.0;
     double time_array[N];
     arange(time_array, 0, N, dt);
     
     double signal[N];
-    generate_signal(signal, time_array, N, a, f, phi);
+//    generate_signal(signal, time_array, N, a, f, phi);
+
+    for(int i = 0; i < N; i++){
+        if((i > 125) && (i < 175)){
+            signal[i] = a;
+        } else {
+            signal[i] = 0.0;
+        }
+        
+    }
 
     /*
      * add a second frequency to signal
