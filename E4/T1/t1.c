@@ -23,12 +23,12 @@ int main(){
     gsl_rng_set(Q, time(NULL));
     
     // define constants
-    double kb = 1.38064852e-23;             // [J/K]
-    double rho = 2.65e3;                    // [kg/m^3]
-    double w0 = 3.1e3*2.0*PI;             // [Hz]
+    double kb = 1.38064852e-23;              // [J/K]
+    double rho = 2.65e3;                     // [kg/m^3]
+    double w0 = 3.1e3*2.0*PI;                // [Hz]
     double d = 2.79e-6;                      // [m]
     double m = rho*4.0*PI*pow(d/2.0,3)/3.0;
-    double temp = 297;                      // [K]
+    double temp = 297;                       // [K]
     double vth = sqrt(kb*temp/m);
     // rescaling: time [ms], length [micro m], mass [micro g]
     vth = vth*1e3;
@@ -39,17 +39,19 @@ int main(){
     double mu_high = 1.0/48.5e-3;
 
 
-    double T =  1;                // total simulation time [ms]
-    double dt = 0.001;            // timestep [ms] 
+    double T =  2;                // total simulation time [ms]
+    double dt = 0.005;            // timestep [ms] 
     int N = (int) (T/dt);
-    int nburn =  (int) (N/10);   
-    double c0 = exp(-mu_high*dt);    
+    int nburn = (int) (N/2);   
+    double c0 = exp(-mu_low*dt);
+
+    printf("burnin time: %.0f ms\n", nburn*dt);    
     
     double x[N+1];    
     double v[N+1];
     
-    x[0] = 0.08;
-    v[0] = 0;
+    x[0] = 40e-3;
+    v[0] = 0.5;
 
     double a = -pow(w0,2)*x[0];
     
@@ -76,16 +78,6 @@ int main(){
         
     }
     
-    double vfft[N+1];
-    powerspectrum(v, vfft, N+1); 
-    powerspectrum_shift(vfft, N+1);
-
-    double freq[N+1];
-    for(int i = 0; i < N+1; i++){
-	    freq[i] = i/(dt*(N+1));
-    }
-    fft_freq_shift(freq, dt, N+1);
-
 
     FILE *fp = fopen("timetrail.csv", "w");
     for(int i = 0; i < N+1; i++){
@@ -93,11 +85,4 @@ int main(){
     }
     fclose(fp);
     
-    FILE *ffft = fopen("spectrum.csv", "w");
-    for(int i = 0; i < N+1; i++){
-        fprintf(fp, "%f,%f\n", vfft[i], freq[i]);
-    }
-    fclose(ffft);
-
-
 }
