@@ -49,7 +49,7 @@ int main(){
     char filename[] = "data/timetrail";
     char run_buffer[10];
 
-    int how_many_runs = 100;
+    int how_many_runs = 10000;
     for(int p = 0; p < how_many_runs; p++){
         // run production
         

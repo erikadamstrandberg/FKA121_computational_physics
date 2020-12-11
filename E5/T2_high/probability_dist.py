@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+#%%
 ntrails = 20
 
 data = np.genfromtxt('../T2_high/data/timetrail0.csv', delimiter=',')

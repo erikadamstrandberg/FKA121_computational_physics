@@ -30,3 +30,11 @@ ax[1,1].set_xlabel("time [ms]")
 
 #plt.savefig("timetrail_dt_005.pdf")
 plt.show()
+
+
+#%%
+
+case_low = np.genfromtxt('../T1/timetrail.csv', delimiter=',')
+
+fig, ax = plt.subplots()
+ax.plot(case_low[:,2], case_low[:,0])

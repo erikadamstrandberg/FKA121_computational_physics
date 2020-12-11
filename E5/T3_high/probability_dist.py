@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-ntrails = 4
+#%%
+ntrails = 900
 
 data = np.genfromtxt('../T3_high/data/timetrail0.csv', delimiter=',')
 
@@ -42,14 +42,12 @@ sigma2_v = sigma2_v/ntrails
 
 
 # T3 
-
-
-step_bin = 0.005
+step_bin = 0.001
 start_bin = -0.2
 stop_bin = 0.2 + step_bin
 x_bins = np.arange(start_bin, stop_bin, step_bin)
 
-step_bin = 0.05
+step_bin = 0.01
 start_bin = -2
 stop_bin = 2 + step_bin
 v_bins = np.arange(start_bin, stop_bin, step_bin)
@@ -67,17 +65,20 @@ for i in range(ntrails):
         x_hist[i,j] = data[ts,0]
         v_hist[i,j] = data[ts,1]
 
-
-def gauass(x,mean, var):
+def gauass(x, mean, var):
     return np.exp(-(x-mean)**2/(2*var))/(np.sqrt(2*np.pi*var))
 
 fig, ax = plt.subplots(2,1)
 for i, ts in enumerate(time_steps):
-    ##ax[0].hist(x_hist[:,i], bins=x_bins, density=True, label='t = '+str(dt*ts))
-    ax[0].plot(x_bins, gauass(x_bins, mean_x[ts], sigma2_x[ts]))
-
-    ##ax[1].hist(v_hist[:,i], bins=v_bins, density=True, label='t = '+str(dt*ts))
-    ax[1].plot(v_bins, gauass(v_bins, mean_v[ts], sigma2_v[ts]))
+    x_mean = np.sum(x_hist[:,i])/ntrails
+    x_var = np.sum((x_hist[:,i]-x_mean)**2)/ntrails
+    ax[0].hist(x_hist[:,i], bins=x_bins, density=True, label='t = '+str(dt*ts))
+    ax[0].plot(x_bins, gauass(x_bins, x_mean, x_var), '--k')
+    
+    v_mean = np.sum(v_hist[:,i])/ntrails
+    v_var = np.sum((v_hist[:,i]-v_mean)**2)/ntrails
+    ax[1].hist(v_hist[:,i], bins=v_bins, density=True, label='t = '+str(dt*ts))
+    ax[1].plot(v_bins, gauass(v_bins, v_mean, v_var), '--k')
 
 ax[0].legend(loc='upper right')
 ax[1].legend(loc='upper right')
