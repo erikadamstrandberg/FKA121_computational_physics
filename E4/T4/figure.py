@@ -1,16 +1,30 @@
 #%%
 import numpy as np
+import scipy
 import matplotlib.pyplot as plt
 
 #%%
-array = np.genfromtxt('../T4/correlation.csv', delimiter=',')
-spectrum = array[:,0]
-freq = array[:,1]  
+array = np.genfromtxt('../T4/correlation_low.csv', delimiter=',')
+corr = array[:,0]
+time = array[:,1] 
+dt = time[1] - time[0] 
+N = len(corr)
 
+corr_inv = np.zeros(N)
+N2 = int(N/2)
+corr_half = corr[0:N2]
+
+phi_fft = np.fft.fft(corr_half)
+freq = np.fft.fftfreq(N/2, d=dt)
 fig, ax = plt.subplots()
-ax.plot(freq, spectrum)
+ax.plot(freq, phi_fft) 
 
-ax.set_xlim([0,1])
+#ax.set_xlim([0,10])
+
+
+
+
+
 
 #%%
 array = np.genfromtxt('../T4/data/power_corr_low.csv', delimiter=',')

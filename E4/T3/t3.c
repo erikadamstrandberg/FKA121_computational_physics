@@ -37,7 +37,7 @@ int main(){
     double mu_high = 1.0/48.5e-3;
 
 
-    double T =  200;                // total simulation time [ms]
+    double T = 300;                // total simulation time [ms]
     double dt = 0.001;            // timestep [ms] 
     int N = (int) (T/dt);
     int nburn =  (int) (N/10);   

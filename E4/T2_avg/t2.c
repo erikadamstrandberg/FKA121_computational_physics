@@ -81,7 +81,7 @@ int main(){
         }
     }
 
-    int B = 100;
+    int B = 4000;
     int M = (int) (nsaved/B);
 
     double freq[M];
