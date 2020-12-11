@@ -1,5 +1,5 @@
 # File containing the main function
-MAIN = t2
+MAIN = t3
 
 # Compiler
 CC ?= gcc
