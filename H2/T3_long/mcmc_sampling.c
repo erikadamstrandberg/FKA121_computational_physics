@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+// GSL for random number generation
+#include <gsl/gsl_rng.h>
+
 void local_energy(double *E_l, double *alpha, 
                   double *x1, double *y1, double *z1, double *x2, double *y2, double *z2)
 {
@@ -61,4 +64,43 @@ void weight(double *w, double *alpha,
     r1 = NULL;
     r2 = NULL;
     r12 = NULL;
+}
+
+void metropolis_move(double *x1, double *y1, double *z1, 
+                     double *x2, double *y2, double *z2,
+                     double *delta,
+                     double *alpha,
+                     int *accept,
+                     gsl_rng *gsl_rand)
+{
+    double *x1_t = malloc(sizeof(double));
+    double *y1_t = malloc(sizeof(double));
+    double *z1_t = malloc(sizeof(double));
+    double *x2_t = malloc(sizeof(double));
+    double *y2_t = malloc(sizeof(double));
+    double *z2_t = malloc(sizeof(double));
+    // Variables for storing the weight function
+    double *w = malloc(sizeof(double));
+    double *w_t = malloc(sizeof(double));
+
+    *x1_t = *x1 + (*delta)*(gsl_rng_uniform(gsl_rand)-0.5);
+    *y1_t = *y1 + (*delta)*(gsl_rng_uniform(gsl_rand)-0.5);
+    *z1_t = *z1 + (*delta)*(gsl_rng_uniform(gsl_rand)-0.5);
+    *x2_t = *x2 + (*delta)*(gsl_rng_uniform(gsl_rand)-0.5);
+    *y2_t = *y2 + (*delta)*(gsl_rng_uniform(gsl_rand)-0.5);
+    *z2_t = *z2 + (*delta)*(gsl_rng_uniform(gsl_rand)-0.5);
+
+    weight(w, alpha, x1, y1, z1, x2, y2, z2);  
+    weight(w_t, alpha, x1_t, y1_t, z1_t, x2_t, y2_t, z2_t);
+
+    if((*w_t) > (*w) || (*w_t)/(*w) > gsl_rng_uniform(gsl_rand))
+    {
+       *x1 = *x1_t; 
+       *y1 = *y1_t; 
+       *z1 = *z1_t; 
+       *x2 = *x2_t; 
+       *y2 = *y2_t; 
+       *z2 = *z2_t;
+       *accept += 1;
+    } 
 }
