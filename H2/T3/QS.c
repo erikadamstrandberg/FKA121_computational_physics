@@ -74,8 +74,7 @@ int main()
         z2_t = z2[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
 
         weight(&w, &alpha, &x1[i], &y1[i], &z1[i], &x2[i], &y2[i], &z2[i]); 
-        weight(&w_t, &alpha, &x1_t, &y1_t, &z1_t, &x2_t, &y2_t, &z2_t);
-
+        weight(&w_t, &alpha, &x1_t, &y1_t, &z1_t, &x2_t, &y2_t, &z2_t); 
         if(w_t > w || w_t/w > gsl_rng_uniform(gsl_rand))
         {
            x1[i+1] = x1_t; 
