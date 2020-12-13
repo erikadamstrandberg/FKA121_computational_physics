@@ -73,3 +73,47 @@ void block_averaging(double *ns, double *E_l, double *sigma2_E_l, int N, int B)
     Mb = NULL;
     sigma2_each_block = NULL;
 }
+
+void estimate_ns(double *ns, double *E_l, double sigma2_E_l, int N)
+{
+
+    // Caculate and writes the correlation function
+    int k = 30;
+    double phi[k];    
+    correlation_function(phi, E_l, &sigma2_E_l, N, k);
+
+    // Calculates and writes the block averaging
+    int B = 800;
+    double ns_b[B];
+    block_averaging(ns_b, E_l, &sigma2_E_l, N, B);
+
+    // Estimate ns from correlation function
+    double limit = 0.135;
+    double ns_from_corr;
+    int index_after = 0;
+    while (phi[index_after] > limit)
+    {
+        index_after += 1;
+    }
+
+    ns_from_corr = index_after*(phi[index_after-1]-limit)/(phi[index_after-1]-phi[index_after]) + 
+                  (index_after-1)*(limit-phi[index_after])/(phi[index_after-1]-phi[index_after]); 
+
+    // Estimate from block average
+    double ns_from_block = 0;
+    int blocks_from_end = 200;
+    for(int i = B-blocks_from_end; i < B; i++)
+    {
+        ns_from_block += ns_b[i];
+    }
+    ns_from_block = ns_from_block/blocks_from_end;
+
+    if (ns_from_block > ns_from_corr)
+    {
+        *ns = ns_from_block;
+    }
+    else 
+    {
+        *ns = ns_from_corr;
+    }
+}
