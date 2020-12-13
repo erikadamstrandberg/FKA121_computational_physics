@@ -25,9 +25,9 @@ int main()
     gsl_rng* gsl_rand = init_gsl();
 
     // Initializing the simulation
-    double alpha = 0.05;
-    int N_burn = 4000;
-    int N = 120000;
+    double alpha = 0.25;
+    int N_burn = 10000;
+    int N = 1000000;
     double E_l[N];
 
     // Variables for generating the Markovs chain
@@ -58,6 +58,7 @@ int main()
     {
         metropolis_move(&x1, &y1, &z1, &x2, &y2, &z2, &delta, &alpha,  &accept, gsl_rand);
     }
+    
     // Generation of Markov chain with the Metropolis algorithm
     for(int i = 0; i < N; i++)
     {
@@ -66,7 +67,6 @@ int main()
     }
 
     printf("Acceptance ratio: %f\n", (double) accept/((double) N));
-    
 
     // writes current state and the local energy to file
     print_current_state(&x1, &y1, &z1, &x2, &y2, &z2, "current_state");
@@ -78,11 +78,9 @@ int main()
     mean(&mean_E_l, E_l, 0, N);
     sigma2(&sigma2_E_l, E_l, 0, N);
 
-
     double ns;
     estimate_ns(&ns, E_l, sigma2_E_l, N);
     
-
     // Prints the error bars for the calculations
     FILE *estimates = fopen("finalvalue.csv", "w"); 
     fprintf(estimates, "%f,%f,%f,%d,%f\n", mean_E_l, sigma2_E_l, alpha, N, ns);
