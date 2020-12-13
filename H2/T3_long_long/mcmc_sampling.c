@@ -104,3 +104,17 @@ void metropolis_move(double *x1, double *y1, double *z1,
        *accept += 1;
     } 
 }
+
+void grad_alpha_ln_phi(double *grad_ln_phi, double *alpha, 
+                       double *x1, double *y1, double *z1, double *x2, double *y2, double *z2)
+{
+    // Allocating variables
+    double *r12 = malloc(sizeof(double));
+
+    *r12 = sqrt(pow((*x2-*x1),2) + pow((*y2-*y1),2) + pow((*z2-*z1),2));
+    *grad_ln_phi = -pow(*r12,2)/(2.0*pow(1.0+(*alpha)*(*r12),2));
+    
+    // Free all variables
+    free(r12);
+    r12 = NULL;
+}
