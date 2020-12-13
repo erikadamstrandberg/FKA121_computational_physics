@@ -37,3 +37,16 @@ void print_1d_array(double *E_l, int N,
     fclose(el);
 }
 
+void print_current_state(double *x1, double *y1, double *z1, 
+                         double *x2, double *y2, double *z2,
+                         char*filename)
+{
+    char *filename_csv = malloc((strlen(filename) + 4)*sizeof(char));
+
+    strcpy(filename_csv, filename);
+    strcat(filename_csv, ".csv");
+
+    FILE *cs = fopen(filename_csv, "w");
+    fprintf(cs, "%f,%f,%f,%f,%f,%f\n", *x1, *y1, *z1, *x2, *y2, *z2);
+    fclose(cs);
+}

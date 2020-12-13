@@ -31,16 +31,16 @@ int main()
     double E_l[N];
 
     // Variables for generating the Markovs chain
-    double x1[N_tot];
-    double y1[N_tot];
-    double z1[N_tot];
+    double x1;
+    double y1;
+    double z1;
     double x1_t;
     double y1_t;
     double z1_t;
     
-    double x2[N_tot];
-    double y2[N_tot];
-    double z2[N_tot];
+    double x2;
+    double y2;
+    double z2;
     double x2_t;
     double y2_t;
     double z2_t;
@@ -56,53 +56,45 @@ int main()
     int accept = 0;
 
     // Picking random first step 
-    x1[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
-    y1[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
-    z1[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
-    x2[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
-    y2[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
-    z2[0] = delta*(gsl_rng_uniform(gsl_rand)-0.5);
+    x1 = delta*(gsl_rng_uniform(gsl_rand)-0.5);
+    y1 = delta*(gsl_rng_uniform(gsl_rand)-0.5);
+    z1 = delta*(gsl_rng_uniform(gsl_rand)-0.5);
+    x2 = delta*(gsl_rng_uniform(gsl_rand)-0.5);
+    y2 = delta*(gsl_rng_uniform(gsl_rand)-0.5);
+    z2 = delta*(gsl_rng_uniform(gsl_rand)-0.5);
 
     // Generation of Markov chain with the Metropolis algorithm
-    for(int i = 0; i < N_tot; i++)
+    for(int i = 0; i < N; i++)
     {
-        x1_t = x1[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
-        y1_t = y1[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
-        z1_t = z1[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
-        x2_t = x2[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
-        y2_t = y2[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
-        z2_t = z2[i] + delta*(gsl_rng_uniform(gsl_rand)-0.5);
+        x1_t = x1 + delta*(gsl_rng_uniform(gsl_rand)-0.5);
+        y1_t = y1 + delta*(gsl_rng_uniform(gsl_rand)-0.5);
+        z1_t = z1 + delta*(gsl_rng_uniform(gsl_rand)-0.5);
+        x2_t = x2 + delta*(gsl_rng_uniform(gsl_rand)-0.5);
+        y2_t = y2 + delta*(gsl_rng_uniform(gsl_rand)-0.5);
+        z2_t = z2 + delta*(gsl_rng_uniform(gsl_rand)-0.5);
 
-        weight(&w, &alpha, &x1[i], &y1[i], &z1[i], &x2[i], &y2[i], &z2[i]); 
+        weight(&w, &alpha, &x1, &y1, &z1, &x2, &y2, &z2);  
         weight(&w_t, &alpha, &x1_t, &y1_t, &z1_t, &x2_t, &y2_t, &z2_t);
 
         if(w_t > w || w_t/w > gsl_rng_uniform(gsl_rand))
         {
-           x1[i+1] = x1_t; 
-           y1[i+1] = y1_t; 
-           z1[i+1] = z1_t; 
-           x2[i+1] = x2_t; 
-           y2[i+1] = y2_t; 
-           z2[i+1] = z2_t;
+           x1 = x1_t; 
+           y1 = y1_t; 
+           z1 = z1_t; 
+           x2 = x2_t; 
+           y2 = y2_t; 
+           z2 = z2_t;
            accept += 1;
         } 
-        else 
-        {
-           x1[i+1] = x1[i]; 
-           y1[i+1] = y1[i]; 
-           z1[i+1] = z1[i]; 
-           x2[i+1] = x2[i]; 
-           y2[i+1] = y2[i]; 
-           z2[i+1] = z2[i];
-        }
+        
+        local_energy(&E_l[i], &alpha, &x1, &y1, &z1, &x2, &y2, &z2);
     }
 
     printf("Acceptance ratio: %f\n", (double) accept/((double) N));
     
 
-    // Calculates and writes the local energy and the Markov chain
-    local_energy(E_l, &alpha, N_tot, burn_in, x1, y1, z1, x2, y2, z2);
-    print_markov(N_tot, x1, y1, z1, x2, y2, z2, "markov_chain");
+    // writes current state and the local energy to file
+    print_current_state(&x1, &y1, &z1, &x2, &y2, &z2, "current_state");
     print_1d_array(E_l, N, "local_energy");
     
     // Calculation of mean and variance of E_l
