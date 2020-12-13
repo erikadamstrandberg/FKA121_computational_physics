@@ -123,7 +123,6 @@ int main()
     block_averaging(ns_b, E_l, &sigma2_E_l, N, B);
     print_1d_array(ns_b, B, "block_average");
 
-
     double ns;
 
     // Estimate ns from correlation function
