@@ -30,14 +30,10 @@ void local_energy(double *E_l, double *alpha,
 
 
     // Free all variables
-    free(r1);
-    free(r2);
-    free(r12);
-    free(snd_term);
-    r1 = NULL;
-    r2 = NULL;
-    r12 = NULL;
-    snd_term = NULL;
+    free(r1); r1 = NULL;
+    free(r2); r2 = NULL;
+    free(r12); r12 = NULL;
+    free(snd_term); snd_term = NULL;
 
 }
 
@@ -58,12 +54,10 @@ void weight(double *w, double *alpha,
     *w = pow(exp(-2.0*(*r1))*exp(-2.0*(*r2))*exp((*r12)/(2.0*(1.0+*alpha*(*r12)))), 2);
 
     // Free all variables
-    free(r1);
-    free(r2);
-    free(r12);
-    r1 = NULL;
-    r2 = NULL;
-    r12 = NULL;
+    free(r1); r1 = NULL;
+    free(r2); r2 = NULL;
+    free(r12); r12 = NULL;
+    
 }
 
 void metropolis_move(double *x1, double *y1, double *z1, 
@@ -102,7 +96,17 @@ void metropolis_move(double *x1, double *y1, double *z1,
        *y2 = *y2_t; 
        *z2 = *z2_t;
        *accept += 1;
-    } 
+    }
+    
+    free(x1_t); x1_t = NULL; 
+    free(y1_t); y1_t = NULL; 
+    free(z1_t); z1_t = NULL; 
+    free(x2_t); x2_t = NULL; 
+    free(y2_t); y2_t = NULL; 
+    free(z2_t); z2_t = NULL;
+    free(w); w = NULL;
+    free(w_t); w_t = NULL;    
+
 }
 
 void grad_alpha_ln_phi(double *grad_ln_phi, double *alpha, 

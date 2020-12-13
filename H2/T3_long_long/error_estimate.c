@@ -141,7 +141,7 @@ void estimate_ns(double *ns, double *E_l, double sigma2_E_l, int N)
 void initialize_mcmc(double *ns, double *alpha,
             double *E_l_mean, double *E_l2_mean,
             double *fst_term, double *snd_term,
-            double *delta, int accept, int N_ns, int burn_in, 
+            double *delta, int *accept, int N_ns, int burn_in, 
             double *x1, double *y1, double *z1, double *x2, double *y2, double *z2,
             gsl_rng *gsl_rand)
 {
@@ -178,10 +178,10 @@ void initialize_mcmc(double *ns, double *alpha,
         z2_ns[i] = z2_ns[i-1];
 
         metropolis_move(&x1_ns[i], &y1_ns[i], &z1_ns[i], &x2_ns[i], &y2_ns[i], &z2_ns[i],
-                        delta, alpha, &accept, gsl_rand);
+                        delta, alpha, accept, gsl_rand);
     }
 
-    accept = 0;
+    *accept = 0;
 
     x1_ns[0] = x1_ns[burn_in];
     y1_ns[0] = y1_ns[burn_in];
@@ -201,7 +201,7 @@ void initialize_mcmc(double *ns, double *alpha,
         z2_ns[i] = z2_ns[i-1];
 
         metropolis_move(&x1_ns[i], &y1_ns[i], &z1_ns[i], &x2_ns[i], &y2_ns[i], &z2_ns[i],
-                        delta, alpha, &accept, gsl_rand);
+                        delta, alpha, accept, gsl_rand);
         local_energy(&E_l[i], alpha, &x1_ns[i], &y1_ns[i], &z1_ns[i], &x2_ns[i], &y2_ns[i], &z2_ns[i]);
         *E_l_mean += E_l[i];
         *E_l2_mean += pow(E_l[i], 2);
