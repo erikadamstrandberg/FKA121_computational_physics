@@ -27,8 +27,12 @@ int main()
     // Initializing the simulation
     double alpha = 0.25;
     int N_burn = 10000;
-    int N = 1000000;
-    double E_l[N];
+    int N = 10000000;
+    double E_l_mean = 0.0;
+    double E_l2_mean = 0.0;
+
+    double E_l = 0.0;
+    
 
     // Variables for generating the Markovs chain
     double x1;
@@ -53,6 +57,7 @@ int main()
     y2 = delta*(gsl_rng_uniform(gsl_rand)-0.5);
     z2 = delta*(gsl_rng_uniform(gsl_rand)-0.5);
 
+    
     // run burn in
     for(int i = 0; i < N_burn; i++)
     {
@@ -63,32 +68,16 @@ int main()
     for(int i = 0; i < N; i++)
     {
         metropolis_move(&x1, &y1, &z1, &x2, &y2, &z2, &delta, &alpha,  &accept, gsl_rand);
-        local_energy(&E_l[i], &alpha, &x1, &y1, &z1, &x2, &y2, &z2);
+        local_energy(&E_l, &alpha, &x1, &y1, &z1, &x2, &y2, &z2);
+        E_l_mean += E_l;
+        E_l2_mean += pow(E_l, 2);
+
     }
 
+    E_l_mean = E_l_mean/N;
+    double sigma2 = E_l2_mean/N - pow(E_l_mean, 2);
+
     printf("Acceptance ratio: %f\n", (double) accept/((double) N));
-
-    // writes current state and the local energy to file
-    print_current_state(&x1, &y1, &z1, &x2, &y2, &z2, "current_state");
-    print_1d_array(E_l, N, "local_energy");
-    
-    // Calculation of mean and variance of E_l
-    double mean_E_l = 0.0;
-    double sigma2_E_l = 0.0;
-    mean(&mean_E_l, E_l, 0, N);
-    sigma2(&sigma2_E_l, E_l, 0, N);
-
-    double ns;
-    estimate_ns(&ns, E_l, sigma2_E_l, N);
-    
-    // Prints the error bars for the calculations
-    FILE *estimates = fopen("finalvalue.csv", "w"); 
-    fprintf(estimates, "%f,%f,%f,%d,%f\n", mean_E_l, sigma2_E_l, alpha, N, ns);
-    fclose(estimates);
-
-    printf("Mean of E_l: %f\n", mean_E_l);
-    printf("Variance of E_l: %f\n", sigma2_E_l);
-    printf("Statistical inefficiency: %f\n\n", ns);
-    printf("Estimate: %f +- %f\n",  mean_E_l, sqrt(sigma2_E_l)/(sqrt(N/ns)));
+    printf("Mean: %f\n", E_l_mean);
+    printf("error bar: %f\n", sqrt(10*sigma2/N));
 }
-
