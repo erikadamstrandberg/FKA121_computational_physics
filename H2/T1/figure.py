@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 #%% Uncorrelated! With only one electrion wavefunctions
 array = np.genfromtxt('../T1/data/markov_chain_uncorrelated.csv', delimiter=',')
 
@@ -206,6 +207,42 @@ ax.grid()
 ax.legend(fontsize='16', loc='upper right')
 
 plt.savefig('../T1/figure/probability_benchmark_r2.pdf', format='pdf', bbox_inches='tight')
+plt.show()
+
+r_tot = np.append(r1,r2)
+fig, ax = plt.subplots()
+ax.hist(r_tot, bins=b, density=True, label=r'$\rho(r)$')
+ax.plot(r, rho_unscreened, '--', color='black', label=r'$\rho_{unscreened}(r)$', linewidth=2)
+ax.plot(r, rho_optimized , '--', color='red', label=r'$\rho_{screened}(r)$', linewidth=2)
+
+ax.set_title(r'Benchmarking $\rho(r)$ sampling, $\alpha=0.1$', fontsize='16')
+ax.set_xlabel(r'$r$ [$a_0$]', fontsize='16')
+ax.set_ylabel(r'$\rho$', fontsize='16')
+
+ax.grid()
+ax.legend(fontsize='16', loc='upper right')
+
+plt.savefig('../T1/figure/probability_benchmark_r.pdf', format='pdf', bbox_inches='tight')
+plt.show()
+
+#%%
+
+r1 = np.arange(-1,1)
+r2 = np.arange(-1,1)
+phi = np.exp(-2*r1)*np.exp(-2*r2)
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+
+# Make data.
+r1 = np.arange(0, 1, 0.01)
+r2 = np.arange(0, 1, 0.01)
+R1, R2 = np.meshgrid(r1, r2)
+theta = 60*np.pi/180
+R12 = np.sqrt(R1**2 + R2**2 - 2*R1*R2*np.cos(theta))
+Z = np.exp(-2*R1)*np.exp(-2*R2)*np.exp(R12/(2*(1+0.9*R12)))
+surf = ax.plot_surface(R1, R2, Z)
+
 plt.show()
 
 #%%

@@ -25,7 +25,7 @@ int main()
     gsl_rng* gsl_rand = init_gsl();
 
     // Initializing the simulation
-    double alpha = 0.25;
+    double alpha = 0.16;
     int N_burn = 10000;
     int N = 1000000;
     double E_l[N];
@@ -81,8 +81,17 @@ int main()
     double ns;
     estimate_ns(&ns, E_l, sigma2_E_l, N);
     
+    char filename[80];
+    char alpha_buffer[10];
+    sprintf(alpha_buffer, "%.2f", alpha);
+
+    strcpy(filename, "data/finalvalue_");
+    strcat(filename, alpha_buffer);
+    strcat(filename, ".csv");
+
+
     // Prints the error bars for the calculations
-    FILE *estimates = fopen("finalvalue.csv", "w"); 
+    FILE *estimates = fopen(filename, "w"); 
     fprintf(estimates, "%f,%f,%f,%d,%f\n", mean_E_l, sigma2_E_l, alpha, N, ns);
     fclose(estimates);
 
@@ -91,4 +100,3 @@ int main()
     printf("Statistical inefficiency: %f\n\n", ns);
     printf("Estimate: %f +- %f\n",  mean_E_l, sqrt(sigma2_E_l)/(sqrt(N/ns)));
 }
-

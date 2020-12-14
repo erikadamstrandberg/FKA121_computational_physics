@@ -25,10 +25,11 @@ int main()
     gsl_rng* gsl_rand = init_gsl();
 
     // Initializing the simulation
-    int N_burn   = 4000;
-    int N_tot    = 100000;
-    int N_ns     = 50000;
+    int N_burn   = 10000;
+    int N_tot    = 60000000;
+    int N_ns     = 10000000;
     int N = N_tot - N_ns;
+    int N_opt = 10;
 
     // Setting MC step length  
     double delta = 1.0;
@@ -58,10 +59,12 @@ int main()
     double snd_term = 0.0;
     double grad_ln_phi = 0.0;
 
-    double alpha = 0.1;
-    double beta = 0.5;
-    
-    for(int p = 1; p < 100; p++)
+    double alpha[N_opt];
+
+    alpha[0] = 0.14;
+    double beta = 1.0;
+
+    for(int p = 1; p < N_opt + 1; p++)
     { 
         E_l = 0.0;
         E_l_mean = 0.0;
@@ -86,7 +89,7 @@ int main()
         z2 = delta*(gsl_rng_uniform(gsl_rand)-0.5);
 
         // Initializing the run and finding ns for this alpha
-        initialize_mcmc(&ns, &alpha, 
+        initialize_mcmc(&ns, &alpha[p-1], 
                         &E_l_mean, &E_l2_mean, &fst_term, &snd_term, 
                         &delta, &accept, 
                         N_ns, N_burn, 
@@ -96,12 +99,12 @@ int main()
         // Generation of Markov chain with the Metropolis algorithm
         for(int i = 0; i < N; i++)
         {
-            metropolis_move(&x1, &y1, &z1, &x2, &y2, &z2, &delta, &alpha, &accept, gsl_rand);
-            local_energy(&E_l, &alpha, &x1, &y1, &z1, &x2, &y2, &z2);
+            metropolis_move(&x1, &y1, &z1, &x2, &y2, &z2, &delta, &alpha[p-1], &accept, gsl_rand);
+            local_energy(&E_l, &alpha[p-1], &x1, &y1, &z1, &x2, &y2, &z2);
             E_l_mean += E_l;
             E_l2_mean += pow(E_l, 2);
             
-            grad_alpha_ln_phi(&grad_ln_phi, &alpha, &x1, &y1, &z1, &x2, &y2, &z2); 
+            grad_alpha_ln_phi(&grad_ln_phi, &alpha[i-1], &x1, &y1, &z1, &x2, &y2, &z2); 
             fst_term += E_l*grad_ln_phi;
             snd_term += grad_ln_phi;
 
@@ -116,14 +119,15 @@ int main()
         snd_term = E_l_mean*(snd_term/N_tot);
         grad_E = fst_term - snd_term;
         
-        alpha = alpha - grad_E/pow(p, beta);
+        alpha[p] = alpha[p-1] - grad_E/pow(p, beta);
 
         printf("Acceptance ratio: %f\n", (double) accept/((double) N_tot));
         printf("Mean: %f\n", E_l_mean);
         printf("error bar: %f\n", sqrt(ns*E_l_sigma2/N_tot));
         printf("ns: %f\n", ns);
-        printf("\nalpha: %f\n\n", alpha);
+        printf("\nalpha: %f\n\n", alpha[p]);
     }
+
 
 }
 
