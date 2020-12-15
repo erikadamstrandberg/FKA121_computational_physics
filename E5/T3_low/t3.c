@@ -41,25 +41,14 @@ int main(){
     double T = 5.0;                // total simulation time [ms]
     double dt = 0.001;            // timestep [ms] 
     int N = (int) (T/dt);
-    double c0 = exp(-mu_high*dt);
+    double c0 = exp(-mu_low*dt);
     
     double x[N+1];    
     double v[N+1];
-    double x_mean[N+1];
-    double v_mean[N+1];
-    double x_sigma2[N+1];
-    double v_sigma2[N+1];
-
-    for(int i = 0; i < N+1; i++){
-        x_mean[i] = 0.0;
-        v_mean[i] = 0.0;
-        x_sigma2[i] = 0.0;
-        x_sigma2[i] = 0.0;
-    }
-
+   
     char filename[] = "data/timetrail";
     char run_buffer[10];
-    
+
     int how_many_runs = 10000;
     for(int p = 0; p < how_many_runs; p++){
         // run production
@@ -78,15 +67,6 @@ int main(){
         
         }
 
-        for(int t = 0; t < N+1; t++){
-            x_mean[t] += x[t];
-            v_mean[t] += v[t];
-        }
-
-        for(int t = 0; t < N+1; t++){
-            x_sigma2[t] += pow(x[t], 2);
-            v_sigma2[t] += pow(v[t], 2); 
-        }
 
         char *filename_csv = malloc(40*sizeof(char));
         sprintf(run_buffer, "%d", p);
@@ -101,22 +81,4 @@ int main(){
         fclose(fp);
         free(filename_csv); filename_csv = NULL;
     }
-
-    for(int t = 0; t < N+1; t++){
-        x_mean[t] = x_mean[t]/how_many_runs;
-        v_mean[t] = v_mean[t]/how_many_runs;
-    }
-
-
-    for(int t = 0; t < N+1; t++){
-        x_sigma2[t] = x_sigma2[t]/how_many_runs - pow(x_mean[t], 2);
-        v_sigma2[t] = v_sigma2[t]/how_many_runs - pow(v_mean[t], 2);
-    }
-
-
-    FILE *fest = fopen("data/mean_and_var.csv", "w");
-    for(int i = 0; i < N+1; i++){
-        fprintf(fest, "%f,%f,%f,%f,%f\n", x_mean[i], v_mean[i], x_sigma2[i], v_sigma2[i], i*dt);
-    }
-    fclose(fest);
-}    
+}

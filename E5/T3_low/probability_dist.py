@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 #%%
 ntrails = 900
 
-data = np.genfromtxt('../T3_high/data/timetrail0.csv', delimiter=',')
+data = np.genfromtxt('../T3_low/data/timetrail0.csv', delimiter=',')
 
 time = data[:,2]
 dt = time[1]-time[0]
@@ -15,7 +15,7 @@ sigma2_x = np.zeros(N)
 sigma2_v = np.zeros(N)
 
 for i in range(ntrails):
-    data = np.genfromtxt('../T3_high/data/timetrail' + str(i) + '.csv', delimiter=',')
+    data = np.genfromtxt('../T3_low/data/timetrail' + str(i) + '.csv', delimiter=',')
 
     x = data[:,0]
     v = data[:,1]
@@ -28,7 +28,7 @@ mean_x = mean_x/ntrails
 mean_v = mean_v/ntrails
 
 for i in range(ntrails):
-    data = np.genfromtxt('../T3_high/data/timetrail' + str(i) + '.csv', delimiter=',')
+    data = np.genfromtxt('../T3_low/data/timetrail' + str(i) + '.csv', delimiter=',')
 
     x = data[:,0]
     v = data[:,1]
@@ -40,13 +40,14 @@ for i in range(ntrails):
 sigma2_x = sigma2_x/ntrails
 sigma2_v = sigma2_v/ntrails
 
+
 # T3 
-step_bin = 0.005
+step_bin = 0.001
 start_bin = -0.2
 stop_bin = 0.2 + step_bin
 x_bins = np.arange(start_bin, stop_bin, step_bin)
 
-step_bin = 0.05
+step_bin = 0.01
 start_bin = -2
 stop_bin = 2 + step_bin
 v_bins = np.arange(start_bin, stop_bin, step_bin)
@@ -83,6 +84,8 @@ ax[0].set_xlabel('x [um]')
 ax[1].legend(loc='upper right')
 ax[1].set_title('v')
 ax[1].set_xlabel('v [mm/s]')
-plt.savefig('../T3_high/figure/dist_high_unit.pdf', format='pdf', bbox_inches='tight')
+plt.savefig('../T3_high/figure/dist_low_unit.pdf', format='pdf', bbox_inches='tight')
 plt.show()
+
+
 

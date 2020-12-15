@@ -41,7 +41,7 @@ int main(){
     double T = 5.0;                // total simulation time [ms]
     double dt = 0.001;            // timestep [ms] 
     int N = (int) (T/dt);
-    double c0 = exp(-mu_low*dt);
+    double c0 = exp(-mu_high*dt);
     
     double x[N+1];    
     double v[N+1];
