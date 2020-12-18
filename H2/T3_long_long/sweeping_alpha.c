@@ -26,10 +26,10 @@ int main()
 
     // Initializing the simulation
     int N_burn   = 10000;
-    int N_tot    = 1000000000;
+    int N_tot    = 50000000;
     int N_ns     = 100000;
     int N = N_tot - N_ns;
-    int N_opt = 20;
+    int N_opt = 100;
 
     // Setting MC step length  
     double delta = 1.0;
@@ -60,7 +60,7 @@ int main()
     double grad_ln_phi = 0.0;
 
     // Array for storing all the optimized alphas
-    double alpha = 0.1433;
+    double alpha = 0.150;
 
     // Saving trails of the calculated energy
     double E_saved[N_opt];
@@ -128,7 +128,7 @@ int main()
     char filename_csv[40];
     char alpha_buffer[10];
     sprintf(alpha_buffer, "%.3f", alpha);
-    strcpy(filename_csv, "data_final/alphasweep_");
+    strcpy(filename_csv, "data4/alphasweep_");
     strcat(filename_csv, alpha_buffer);
     strcat(filename_csv, ".csv");
         

@@ -35,11 +35,11 @@ for i in range(len(El)-1):
 
 
 fig, ax = plt.subplots()
-ax.plot(El_avg, color='orange', label=r'$E_L[R_i]$', linewidth=2)
+ax.plot(El_avg, color='orange', label=r'$\hat{E}_i$', linewidth=2)
 
-ax.set_title(r'Calculated energy, $E_L$, with bad initial step', fontsize='16')
+ax.set_title(r'Estimated energy, $\hat{E}$, with bad initial step', fontsize='16')
 ax.set_xlabel(r'$i$', fontsize='16')
-ax.set_ylabel(r'$E_L$ [$a.u.$]', fontsize='16')
+ax.set_ylabel(r'$\hat{E}$ [$a.u.$]', fontsize='16')
 
 ax.grid()
 ax.legend(fontsize='16', loc='upper left')
@@ -74,11 +74,11 @@ for i in range(len(El)):
 
 
 fig, ax = plt.subplots()
-ax.plot(El_avg, color='orange', label=r'$E_L[R_i]$', linewidth=2)
+ax.plot(El_avg, color='orange', label=r'$\hat{E}_i$', linewidth=2)
 
-ax.set_title(r'Calculated energy, $E_L$, with burn in $N_{eq} = 1000$', fontsize='16')
+ax.set_title(r'Calculated energy, $\hat{E}$, with burn in $N_{eq} = 1000$', fontsize='16')
 ax.set_xlabel(r'$i$', fontsize='16')
-ax.set_ylabel(r'$E_L$ [$a.u.$]', fontsize='16')
+ax.set_ylabel(r'$\hat{E}$ [$a.u.$]', fontsize='16')
 
 ax.set_ylim([-3.2,-2.5])
 
@@ -114,11 +114,11 @@ for i in range(len(El)):
 
 
 fig, ax = plt.subplots()
-ax.plot(El_avg, color='orange', label=r'$E_L[R_i]$', linewidth=2)
+ax.plot(El_avg, color='orange', label=r'$\hat{E}_i$', linewidth=2)
 
-ax.set_title(r'Calculated energy, $E_L$, with random initial and burn in $N_{eq} = 1000$', fontsize='16')
+ax.set_title(r'Calculated energy, $\hat{E}$, with random initial and burn in $N_{eq} = 1000$', fontsize='16')
 ax.set_xlabel(r'$i$', fontsize='16')
-ax.set_ylabel(r'$E_L$ [$a.u.$]', fontsize='16')
+ax.set_ylabel(r'$\hat{E}$ [$a.u.$]', fontsize='16')
 
 ax.set_ylim([-3.2,-2.5])
 
@@ -138,11 +138,11 @@ for i in range(len(El)):
     El_avg[i] = np.sum(El[0:i])/(i+1)
 
 fig, ax = plt.subplots()   
-ax.plot(El_avg, color='orange', label=r'$E_L[R_i]$', linewidth=2)
+ax.plot(El_avg, color='orange', label=r'$\hat{E}_i$', linewidth=2)
 
-ax.set_title(r'Calculated energy, $E_L$, with random initial and burn in $N_{eq} = 1000$', fontsize='16')
+ax.set_title(r'Calculated energy, $\hat{E}_i$, with random initial and burn in $N_{eq} = 1000$', fontsize='16')
 ax.set_xlabel(r'$i$', fontsize='16')
-ax.set_ylabel(r'$E_L$ [$a.u.$]', fontsize='16')
+ax.set_ylabel(r'$\hat{E}$ [$a.u.$]', fontsize='16')
 
 ax.set_ylim([-2.9,-2.84])
 
