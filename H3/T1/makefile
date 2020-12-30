@@ -8,13 +8,14 @@ CC ?= gcc
 PROGRAM = $(MAIN)
 
 # Include all your object files
-OBJECTS = $(MAIN).o 
+OBJECTS = $(MAIN).o fft.o write_to_file.o
 
 # Libraries to be included 
 LIBS = \
 	   -lm \
 	   -lgsl \
-	   -lgslcblas
+	   -lgslcblas \
+	   -lfftw3
 
 # Standard run for make
 CFLAGS = \
