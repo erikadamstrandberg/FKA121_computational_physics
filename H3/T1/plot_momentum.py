@@ -19,6 +19,9 @@ def std_from_FWHM(n, dx):
     width_limit = max_value/2
     return np.sum(n > width_limit)*dx/(2*np.sqrt(2*np.log(2)))
 
+def p_width_anal(d, hbar_prim):
+    return hbar_prim/(np.sqrt(2)*d)
+
 d   = 0.5               # Width of our hydrogen atom
 m_h = 1/m_prim_u        # Mass of our hydrogen atom
 
@@ -53,7 +56,7 @@ n_p_anal = np.abs(phi_p_anal)**2
 print(np.sum(n_p_anal)*dp)
 
 print(std_from_FWHM(n_p, dp))
-print(hbar_prim/(np.sqrt(2)*d))
+print(p_width_anal(d, hbar_prim))
 
 k = p/hbar_prim
 k0 = p0/hbar_prim

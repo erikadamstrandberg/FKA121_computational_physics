@@ -26,11 +26,6 @@ def x_width_anal(t, d, m, hbar_prim):
     time_factor = np.sqrt(1 + hbar_prim**2*t**2/(m**2*d**4))
     return prefactor*time_factor
 
-def p_width_anal(t, d, m, hbar_prim):
-    prefactor = d/np.sqrt(2)
-    time_factor = np.sqrt(1 + hbar_prim**2*t**2/(m**2*d**4))
-    return prefactor*time_factor
-
 def std_from_FWHM(n, dx):
     max_value = np.max(n)
     width_limit = max_value/2
