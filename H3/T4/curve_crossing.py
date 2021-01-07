@@ -56,9 +56,9 @@ print('Energy gap for c=0.05:\t ' + str(delta_E_1))
 print('Energy gap for c=0.1:\t ' + str(delta_E_2))
 
 # plot potentials
-legend_fs = 15
-axis_fs = 15
-title_fs = 15
+legend_fs = 16
+axis_fs = 16
+title_fs = 16
 
 v11_color = 'C0'
 v22_color = 'C1'

@@ -39,6 +39,8 @@ def p_width_anal(d, hbar_prim):
 
 #%% Generate initial wave packet
 
+#%%
+dt = 0.05
 d   = 0.5               # Width of our hydrogen atom
 m_h = 1/m_prim_u        # Mass of our hydrogen atom
 
