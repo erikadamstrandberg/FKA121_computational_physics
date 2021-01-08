@@ -81,5 +81,5 @@ ax.legend(fontsize='16', loc='upper right')
 ax.set_xlim([0,14])
 ax.set_ylim([y_min,y_max])
 
-#plt.savefig('../T1/initial_gauss_momentum.pdf', format='pdf', bbox_inches='tight')
-#plt.show()
+plt.savefig('../T1/initial_gauss_momentum.pdf', format='pdf', bbox_inches='tight')
+plt.show()

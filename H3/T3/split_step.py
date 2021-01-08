@@ -18,8 +18,8 @@ m_prim_u = 0.009647                 # mass/u in ASU_prim
 
 # position space
 dx      = 0.001
-x_start = -150.0
-x_stop  = 150.0
+x_start = -200.0
+x_stop  = 200.0
 x = np.arange(x_start, x_stop, dx)
 Nx = len(x)
 
@@ -35,15 +35,21 @@ m_h = 1/m_prim_u        # Mass of our hydrogen atom
 
 initial_energy = 0.08
 p0 = np.sqrt(2*initial_energy*m_h)   # Initial momentum of our hydrogen atom
-x0 = -12                 # Initial position of our hydrogen atom
+x0 = -15                 # Initial position of our hydrogen atom
 
 ## Propagation
-T = 1800
+T = 1000
 dt = 0.1
 Nt = int(T/dt)
 
 V0 = 0.1
-alpha = 0.5
+alpha = 2.0
+
+# adiabatic potentials
+lim = 1e-60
+a = 0.3
+b = 0.4
+c = 0.05
 
 V_x = V0/(np.cosh(x/alpha)**2)
 
@@ -56,8 +62,20 @@ phi_x_initial = phi_x
 n_x_initial = np.abs(phi_x_initial)**2
 
 fig, ax = plt.subplots() 
-ax.plot(x, n_x_initial)
-ax.plot(x, V_x)
+ax.plot(x, V_x        , color='orange', linewidth=2, label=r'$V_x(x)$')
+ax.plot(x, n_x_initial, color='blue', linewidth=2, label=r'$|\psi(x)|^2$')
+
+ax.set_title(r'Simulation set up, $V_0=0.1$ eV, $\alpha=2.0$ Å', fontsize='16')
+ax.set_xlabel(r'$x$ [$Å$]', fontsize='16')
+ax.set_ylabel(r'$|\psi(x)|^2$ [$Å^{-1}$], $V(x)$ [$eV$]', fontsize='16')
+
+ax.set_xlim([-20,20])
+
+ax.grid()
+ax.legend(fontsize='16', loc='upper right')
+
+plt.savefig('../T3/Sim_set_up_alpha_2.pdf', format='pdf', bbox_inches='tight')
+plt.show()
     
 #%%
 
@@ -67,8 +85,8 @@ for t in range(Nt):
         print(f'Saving figure for timestep: {t} / {Nt}')
     phi_x = propagate(phi_x, p_prop, v_prop)
     
-    
 n_x = np.abs(phi_x)**2
+
 np.savetxt('data/V_x_e0_{:.2f}_V0_{:.2f}.csv'.format(initial_energy,V0), V_x, delimiter=",")
 np.savetxt('data/n_x_e0_{:.2f}_V0_{:.2f}.csv'.format(initial_energy,V0), n_x, delimiter=",")
 np.savetxt('data/x_e0_{:.2f}_V0_{:.2f}.csv'.format(initial_energy,V0), x, delimiter=",")

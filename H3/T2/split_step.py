@@ -39,7 +39,6 @@ def p_width_anal(d, hbar_prim):
 
 #%% Generate initial wave packet
 
-#%%
 dt = 0.05
 d   = 0.5               # Width of our hydrogen atom
 m_h = 1/m_prim_u        # Mass of our hydrogen atom
@@ -113,36 +112,51 @@ for t in range(Nt):
 phi_x_initial_anal = wave_package_position_evo(x, x0, 0, p0, d, m_h, hbar_prim)
 n_x_initial_anal   = np.abs(phi_x_initial_anal)**2
 
-fig, ax = plt.subplots()
-ax.plot(time, width_x, '--')
-ax.plot(time, width_x_anal)
-ax.plot(time, width_p/hbar_prim)
-ax.plot(time, width_p_anal/hbar_prim)
 
 #%%
 fig, ax = plt.subplots()
-ax.plot(x, n_x_initial_anal, '--')
+ax.plot(time, width_x, color='lightblue', linewidth=4, label=r'$\sigma_x(t)$')
+ax.plot(time, width_x_anal, '--', color='black', linewidth=4, label=r'$\sigma_{x,analytical}(t)$')
 
-for i in range(len(save_every) + 1):
-    ax.plot(x, n_x_plot[i])
+ax.plot(time, width_p/hbar_prim, color='red', linewidth=4, label=r'$\sigma_k(t)$')
+ax.plot(time, width_p_anal/hbar_prim, '--', color='black', linewidth=4, label=r'$\sigma_{k,analytical}(t)$')
 
+ax.set_title(r'Time evolution of width for Gaussian wave packet', fontsize='16')
+ax.set_xlabel(r'$t$ [$fs$]', fontsize='16')
+ax.set_ylabel(r'$x$ [$Å$], $k$ [$Å^{-1}$]', fontsize='16')
+
+ax.grid()
+ax.legend(fontsize='16', loc='upper left')
+
+plt.savefig('../T2/evolution_of_width.pdf', format='pdf', bbox_inches='tight'
+plt.show()
+
+#%%
+fig, ax = plt.subplots()
+
+for i in range(len(save_every) +1):
+    if i == 0:
+        ax.plot(x, n_x_plot[i], linewidth=4, label=r't = 0 fs'.format(save_every[i]))
+    else:
+        ax.plot(x, n_x_plot[i], linewidth=4, label=r't = {:.0f} fs'.format(save_every[i-1]))
 
 for i in range(len(save_every)):
     phi_x_anal = wave_package_position_evo(x, x0, save_every[i], p0, d, m_h, hbar_prim)
     n_x_anal   = np.abs(phi_x_anal)**2
-    ax.plot(x, n_x_anal, '--')
+    ax.plot(x, n_x_anal, '--', color='black', linewidth=2)
 
+ax.plot(x, n_x_initial_anal, '--', color='black', linewidth=4)
 
-ax.set_title(r'Momentum of initial Gaussian wave packet', fontsize='16')
-ax.set_xlabel(r'$k$ [$Å^{-1}$]', fontsize='16')
-ax.set_ylabel(r'$|\psi(k)|^2$ [$Å$]', fontsize='16')
+ax.set_title(r'Free space propagation', fontsize='16')
+ax.set_xlabel(r'$x$ [$Å$]', fontsize='16')
+ax.set_ylabel(r'$|\psi(k)|^2$ [$Å^{-1}$]', fontsize='16')
 
 ax.grid()
 ax.legend(fontsize='16', loc='upper right')
 
 ax.set_xlim([-2,30])
-#ax.set_ylim([y_min,y_max])
 
+plt.savefig('../T2/evolution_wave_packet.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
 #%%

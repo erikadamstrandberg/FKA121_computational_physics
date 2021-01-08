@@ -65,6 +65,13 @@ y_max = np.max(n_x)+0.1
 plot_x0_y = np.array([y_min,y_max])
 
 fig, ax = plt.subplots()
+ax.plot(x, phi_x)
+
+
+#%%
+
+
+fig, ax = plt.subplots()
 ax.plot(x, n_x, color='blue', linewidth=4, label=r'$|\psi(x)|^2$')
 ax.plot(plot_x0_x, plot_x0_y, color='black', label=r'$x_0=3.0\ Å$')
 
@@ -78,5 +85,5 @@ ax.legend(fontsize='16', loc='upper right')
 ax.set_xlim([0,6])
 ax.set_ylim([y_min,y_max])
 
-#plt.savefig('../T1/initial_gauss_position.pdf', format='pdf', bbox_inches='tight')
-#plt.show()
+plt.savefig('../T1/initial_gauss_position.pdf', format='pdf', bbox_inches='tight')
+plt.show()

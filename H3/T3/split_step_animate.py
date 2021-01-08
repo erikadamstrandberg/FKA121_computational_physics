@@ -34,8 +34,9 @@ p         = np.fft.fftshift(p)
 d   = 0.5               # Width of our hydrogen atom
 m_h = 1/m_prim_u        # Mass of our hydrogen atom
 
-p0 = np.sqrt(0.2*m_h)   # Initial momentum of our hydrogen atom
-x0 = -10                 # Initial position of our hydrogen atom
+initial_energy = 0.12
+p0 = np.sqrt(2*initial_energy*m_h)   # Initial momentum of our hydrogen atom
+x0 = -15                 # Initial position of our hydrogen atom
 
 #%% Propagation
 T = 550
@@ -43,7 +44,7 @@ dt = 0.1
 Nt = int(T/dt)
 
 V0 = 0.1
-alpha = 2
+alpha = 2.0
 
 V_x = V0/(np.cosh(x/alpha)**2)
 
