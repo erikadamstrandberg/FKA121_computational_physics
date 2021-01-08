@@ -1,21 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.linalg import inv
 
 def wave_package_position(x, x0, p0, d, hbar_prim):    
     prefactor = np.sqrt(np.sqrt(np.pi)*d)
     envelope  = np.exp(-(x - x0)**2/(2*d**2))
     plane_wave = np.exp(1j*p0*(x - x0)/hbar_prim)
     return (1/prefactor)*envelope*plane_wave
-
-def propagate(phi_x, p_prop, v_prop_1, v_prop_2, A, A_inv):
-    phi_trans = np.einsum('ijn,kjn->ikn', A_inv, np.einsum('ijn,jkn->ikn', phi_x, A))
-    phi_trans[0,0,:] = v_prop_1*phi_trans[0,0,:]
-    phi_trans[1,0,:] = v_prop_2*phi_trans[1,0,:]
-
-    #phi_x[0] = v_prop_1*phi_x[0] 
-    #phi_x[1] = v_prop_2*phi_x[1]
-    
-    return 1 #np.fft.ifft(p_prop*np.fft.fft(v_prop*phi_x))
 
 def V11(x, a, b):
     output = np.zeros(len(x))
@@ -25,7 +16,6 @@ def V11(x, a, b):
 
 def V22(x, a, b):
     return 2*a-V11(x, a, b)
-
 
 def V12(x, c, d, lim):
     v = c*np.exp(-(x/d)**2)
@@ -42,7 +32,30 @@ def V22_adiabatic(x, a, b, c, di, lim):
     V_11 = V11(x, a, b)
     V_22 = V22(x, a, b)
     V_12 = V12(x, c, d, lim)
-    return (V_11 + V_22 - np.sqrt((V_11-V_22)**2 + 4*V_12**2))/2 
+    return (V_11 + V_22 - np.sqrt((V_11-V_22)**2 + 4*V_12**2))/2
+
+####################################################################
+
+def linalg_inv(A):
+    A_inv = np.zeros_like(A)
+    for i in range(len(A[0,0,:])):
+        A_inv[:,:,i] = inv(A[:,:,i])
+    return A_inv
+
+def to_diabatic(phi_x, A):
+    return np.einsum('ijk,ik->jk', A, phi_x)
+
+def to_adiabatic(phi_x, A_inv):
+    return np.einsum('ijk,ik->jk', A_inv, phi_x)
+
+def propagate(phi_x, p_prop, v_prop_1, v_prop_2, A, A_inv):
+    phi_temp = phi_x
+    phi_temp[0,:] = v_prop_1*phi_temp[0,:]
+    phi_temp[1,:] = v_prop_2*phi_temp[1,:]
+    phi_trans = phi_temp #np.einsum('ijk,ik->jk', A, phi_x)
+    phi_trans[0,:] = np.fft.ifft(p_prop*np.fft.fft(phi_trans[0,:]))
+    phi_trans[1,:] = np.fft.ifft(p_prop*np.fft.fft(phi_trans[1,:]))
+    return  phi_trans #np.einsum('ijk,ik->jk', A_inv, phi_trans)
 
 #%% define constants
 
@@ -69,10 +82,10 @@ d   = 0.5               # Width of our hydrogen atom
 m_h = 1/m_prim_u        # Mass of our hydrogen atom
 
 p0 = np.sqrt(0.2*m_h)   # Initial momentum of our hydrogen atom
-x0 = -1                 # Initial position of our hydrogen atom
+x0 = -15                 # Initial position of our hydrogen atom
 
 #%% Propagation
-T = 60
+T = 100
 dt = 0.1
 Nt = int(T/dt)
 
@@ -82,6 +95,7 @@ lim = 1e-60
 a = 0.3
 b = 0.4
 c = 0.05
+
 
 V_a = V11_adiabatic(x, a, b, c, d, lim) 
 V_b = V22_adiabatic(x, a, b, c, d, lim) 
@@ -105,45 +119,37 @@ A_12 = -(alpha+beta)/(2*V_12)
 A_21 = np.ones(len(x))
 A_22 = np.ones(len(x))
 A = np.array([[A_11, A_12], [A_21, A_22]])
-A_inv = (V_12/beta)*np.array([[A_22, -A_12], [-A_21, A_11]])
+#A_inv = (V_12/beta)*np.array([[A_22, -A_12], [-A_21, A_11]])
+A_inv = linalg_inv(A)
 
 # set initial wavefunction
 phi_x_1 = wave_package_position(x, x0, p0, d, hbar_prim)
 phi_x_2 = np.zeros(len(x))
 phi_x = np.array([phi_x_1, phi_x_2])
-#phi_x = np.array([[phi_x_1, phi_x_2]])
 
-phi_trans = np.zeros_like(phi_x)
-for i in range(len(x)):
-    phi_trans[:,i] = A_inv[:,:,i] @ phi_x[:,i] @ A[:,:,i]
-phi_back = np.zeros_like(phi_x)
-for i in range(len(x)):
-    phi_back[:,i] = A[:,:,i] @ phi_trans[:,i] @ A_inv[:,:,i]
+#phi_x_initial_1 = phi_x[0,:]
+#phi_x_initial_2 = phi_x[1,:]
 
-#phi_trans = np.einsum('ijn,jkn->ikn', phi_x, A)
-#phi_trans_2 = np.einsum('ijn,kjn->ikn', A_inv, phi_trans)
-
-#phi_trans = np.einsum('ijn,kjn->ikn', A_inv, np.einsum('ijn,jkn->ikn', phi_x, A))
-#phi_back = np.einsum('ijn,kjn->ikn', A, np.einsum('ijn,jkn->ikn', phi_trans, A_inv))
-
-#plt.plot(x, phi_trans[1,:])
-plt.plot(x, phi_back[0,:])
-plt.plot(x, phi_x[0,:])
-plt.show()
-
-
-phi_x = propagate(phi_x, P_prop, V_prop_1, V_prop_2, A, A_inv)
-
-"""
-# propagate wave!
-for t in range(Nt):
-    phi_x = propagate(phi_x, P_prop, V_prop_1, V_prop_2, A)
-
-n_x = np.abs(phi_x)**2
 
 fig, ax = plt.subplots()
-ax.plot(x, n_x)
-#ax.plot(x, v_x)
+#ax.plot(x, phi_x_initial_1)
+"""
+phi_trans = to_diabatic(phi_x, A)
+phi_back = to_adiabatic(phi_trans, A_inv)
 
+plt.plot(phi_x[0,:])
+plt.plot(phi_back[0,:])
 plt.show()
 """
+
+# propagate wave!
+phi_x_prop = propagate(phi_x, P_prop, V_prop_1, V_prop_2, A, A_inv)
+for t in range(Nt):
+    phi_x_prop = propagate(phi_x_prop, P_prop, V_prop_1, V_prop_2, A, A_inv)
+
+
+
+#ax.plot(x, phi_x_prop[0,:])
+ax.plot(x, phi_x[0,:])
+
+plt.show()
