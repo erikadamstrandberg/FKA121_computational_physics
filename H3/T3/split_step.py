@@ -18,8 +18,8 @@ m_prim_u = 0.009647                 # mass/u in ASU_prim
 
 # position space
 dx      = 0.001
-x_start = -200.0
-x_stop  = 200.0
+x_start = -150.0
+x_stop  = 150.0
 x = np.arange(x_start, x_stop, dx)
 Nx = len(x)
 
@@ -38,8 +38,8 @@ p0 = np.sqrt(2*initial_energy*m_h)   # Initial momentum of our hydrogen atom
 x0 = -15                 # Initial position of our hydrogen atom
 
 ## Propagation
-T = 1000
-dt = 0.1
+T = 1e6
+dt = 0.5
 Nt = int(T/dt)
 
 V0 = 0.1
@@ -76,24 +76,36 @@ ax.legend(fontsize='16', loc='upper right')
 
 #plt.savefig('../T3/Sim_set_up_alpha_2.pdf', format='pdf', bbox_inches='tight')
 plt.show()
-    
+ 
 V_less_then = 1e-8
 V_stop_index = np.argmax(V_x > V_less_then)
+
+x_stop_index_R = np.argmax(x > -100)
 x_stop = x[V_stop_index]
 x_stop_2 = x[-1-V_stop_index]
 y_stop = np.array([0,0.3])
 
-
-
-stop_prop = 0.1
+#%%
+stop_prop = 1e-6
 start_checking = False
 # propagate wave!
 for t in range(Nt):
     if (t%100 == 0):
-        print(f'Saving figure for timestep: {t} / {Nt}')    
+        print(f'Saving figure for timestep: {t} / {Nt}')
+        print(np.abs(phi_x[x_stop_index_R])**2)
+    if (np.abs(phi_x[x_stop_index_R])**2 > stop_prop):
+        break
     phi_x = propagate(phi_x, p_prop, v_prop)
     
 n_x = np.abs(phi_x)**2
+
+fig, ax = plt.subplots() 
+ax.plot(x, V_x        , color='orange', linewidth=2, label=r'$V_x(x)$')
+ax.plot(x, n_x, color='blue', linewidth=2, label=r'$|\psi(x)|^2$')
+
+print(n_x[x_stop_index_R])
+print(n_x[V_stop_index])
+print(n_x[-1-V_stop_index])
 
 #np.savetxt('data/V_x_e0_{:.2f}_V0_{:.2f}.csv'.format(initial_energy,V0), V_x, delimiter=",")
 #np.savetxt('data/n_x_e0_{:.2f}_V0_{:.2f}.csv'.format(initial_energy,V0), n_x, delimiter=",")

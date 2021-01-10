@@ -76,8 +76,8 @@ m_prim_u = 0.009647                 # mass/u in ASU_prim
 
 # position space
 dx      = 0.01
-x_start = -60.0
-x_stop  = 60.0
+x_start = -200.0
+x_stop  = 200.0
 x = np.arange(x_start, x_stop, dx)
 Nx = len(x)
 
@@ -91,12 +91,12 @@ p         = np.fft.fftshift(p)
 d   = 0.5               # Width of our hydrogen atom
 m_h = 1/m_prim_u        # Mass of our hydrogen atom
 
-p0 = np.sqrt(0.01*m_h)   # Initial momentum of our hydrogen atom
+p0 = np.sqrt(1*m_h)   # Initial momentum of our hydrogen atom
 x0 = -15                 # Initial position of our hydrogen atom
 
 #%% Propagation
 T = 10000
-dt = 0.1
+dt = 0.5
 Nt = int(T/dt)
 
 
@@ -133,22 +133,8 @@ A = np.array([[A_11, A_12], [A_21, A_22]])
 A_inv = (V_12/beta)*np.array([[A_22, -A_12], [-A_21, A_11]])
 
 
-#
-#V_di = np.array([[V_11, V_12], [V_12, V_22]])
-#V_ad = np.zeros_like(V_di)
-#for i in range(Nx):
-#    V_ad[:,:,i] = A_inv[:,:,i] @ V_di[:,:,i] @ A[:,:,i]
-#    
-#V_stop_index = np.argmax(V_b > 1e-8)
-#x_stop = x[V_stop_index]
-#x_stop_2 = x[-1-V_stop_index]
-#y_stop = np.array([0,0.3])
-#
-#fig, ax = plt.subplots()
-#ax.plot(x, V_a)
-#ax.plot(x, V_ad[1,1,:])
-#ax.plot([x_stop,x_stop], y_stop)
-#ax.plot([x_stop_2,x_stop_2], y_stop)
+x_stop_R1 = np.argmax(x > -150)
+V_check_index = np.argmax(V_b > 1e-8)
 
 #%%
 
@@ -163,18 +149,14 @@ phi_x_initial_1 = phi_x[0,:]
 
 fig, ax = plt.subplots()
 
-lim = 0.1
+wave_packet_check = 1e-10
 # propagate wave!
 #phi_x_prop = propagate(phi_x, P_prop, V_prop_1, V_prop_2, A, A_inv)
 for t in range(Nt):
     if (t%100 == 0):
-        print(f'Timestep {t} \ {Nt}')
-        phi_stop_1 = phi_x[0,x_stop]
-        phi_stop_2 = phi_x[0,x_stop_2]
-        phi_stop_1 = phi_x[0,x_stop]
-        phi_stop_2 = phi_x[0,x_stop_2]
-        if (phi_stop_1 )
-        
+        print(f'Timestep {t} \ {Nt}') 
+        if (np.abs(phi_x[0,x_stop_R1])**2 > wave_packet_check):
+            break
     phi_x = propagate(phi_x, P_prop, V_prop_1, V_prop_2, A, A_inv, Nx)
     
 
