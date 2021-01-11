@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.linalg import inv
 
 def wave_package_position(x, x0, p0, d, hbar_prim):    
     prefactor = np.sqrt(np.sqrt(np.pi)*d)
@@ -38,20 +37,20 @@ def propagate(phi_x, p_prop, v_prop_1, v_prop_2, A, A_inv, Nx):
     phi_trans_v = np.zeros_like(phi_x)
     phi_trans_t = np.zeros_like(phi_x)
     phi_dia = np.zeros_like(phi_x)
-
+    
     # Propagating with potential operatior
     phi_trans_v[0,:] = v_prop_1*phi_x[0,:]
     phi_trans_v[1,:] = v_prop_2*phi_x[1,:]
     
     # Transformation to diabatic states
-    phi_dia = np.einsum('ijk,ik->jk', A_inv, phi_trans_v)
-         
+    phi_dia = np.einsum('ijk, ik -> jk', A_inv, phi_trans_v)
+    
     # Propagating with kinetic operatior
     phi_trans_t[0,:] = np.fft.ifft(p_prop*np.fft.fft(phi_dia[0,:]))
     phi_trans_t[1,:] = np.fft.ifft(p_prop*np.fft.fft(phi_dia[1,:]))
     
     # Transformation back to adiabatic states
-    return np.einsum('ijk,ik->jk', A, phi_trans_t)
+    return np.einsum('ijk, ik -> jk', A, phi_trans_t)
 
 def reflection(phi_x, Nx, dx):
     n_x = np.abs(phi_x)**2
@@ -72,8 +71,8 @@ m_h = 1/m_prim_u                    # Mass of our hydrogen atom
 
 # position space
 dx      = 0.01
-x_start = -200.0
-x_stop  = 200.0
+x_start = -80.0
+x_stop  = 80.0
 x = np.arange(x_start, x_stop, dx)
 Nx = len(x)
 
@@ -84,12 +83,12 @@ p         = np.arange(-p_nyquist, p_nyquist, dp)   # Generating momentum "freq"
 p         = np.fft.fftshift(p)
 
 # time propagation
-T = 1000
-dt = 0.05
+T = 300
+dt = 0.1
 Nt = int(T/dt)
 
 # Define potential energies
-lim = 1e-60
+lim = 1e-100
 a = 0.3
 b = 0.4
 c = 0.05
@@ -112,18 +111,18 @@ A_11 = -(alpha+beta)/(2*V_12)
 A_12 = -(alpha-beta)/(2*V_12)
 A_21 = np.ones(len(x))
 A_22 = np.ones(len(x))
-A = np.array([[A_11, A_12], [A_21, A_22]])
-A_inv = -(V_12/beta)*np.array([[A_22, -A_12], [-A_21, A_11]])
+A = V_12*np.array([[A_11, A_12], [A_21, A_22]])
+A_inv = -(1/beta)*np.array([[A_22, -A_12], [-A_21, A_11]])
 
-V_ad_check = np.array([[V_a, np.zeros(len(x))],[np.zeros(len(x)), V_b]])
+
+V_ad_check = np.array([[V_a, np.zeros(len(x))], [np.zeros(len(x)), V_b]])
 V_dia = np.array([[V_11, V_12], [V_12, V_22]])
 
 V_ad = np.zeros_like(V_dia)
 for i in range(len(x)):
-    V_ad[:,:,i] = A_inv[:,:,i] @ V_dia[:,:,i] @ A[:,:,i]
+    V_ad[:,:,i] = (A_inv[:,:,i] @ V_dia[:,:,i] @ A[:,:,i])
 
 print(np.allclose(V_ad, V_ad_check, atol=1e-15))
-
 
 # define propagators
 V_prop_1 =  np.exp(-1j*V_a*dt/hbar_prim)
@@ -131,12 +130,11 @@ V_prop_2 =  np.exp(-1j*V_b*dt/hbar_prim)
 
 P_prop = np.exp(-1j*p**2*dt/(hbar_prim*2*m_h))
 
-#%%
 # initial values for wavefunction
-E_i =5*a                                     # initial energy
+E_i = 0.6*a                                     # initial energy
 width = hbar_prim/(4*np.sqrt(0.1*E_i*m_h))    # Width of our hydrogen atom
 
-p0 = np.sqrt(1*m_h)         # Initial momentum of our hydrogen atom
+p0 = np.sqrt(2*m_h*E_i)     # Initial momentum of our hydrogen atom
 x0 = -15                    # Initial position of our hydrogen atom
 
 # set initial wavefunction
@@ -151,7 +149,7 @@ R_2 = reflection(phi_x[1,:], Nx, dx)
 prob_0 = T_1 + T_2 + R_1 + R_2
 print(prob_0)
 
-x_stop_R1 = np.argmax(x > -150)
+x_stop_R1 = np.argmax(x > -200)
 V_check_index = np.argmax(V_b > 1e-8)
 wave_packet_check = 1e-10
 
@@ -163,7 +161,7 @@ for t in range(Nt):
             break
     phi_x = propagate(phi_x, P_prop, V_prop_1, V_prop_2, A, A_inv, Nx)
     
-
+    
 T_1 = transmission(phi_x[0,:], Nx, dx)
 T_2 = transmission(phi_x[1,:], Nx, dx)
 R_1 = reflection(phi_x[0,:], Nx, dx)
