@@ -52,6 +52,28 @@ def propagate(phi_x, p_prop, v_prop_1, v_prop_2, A, A_inv, Nx):
     # Transformation back to adiabatic states
     return np.einsum('ijk, ik -> jk', A, phi_trans_t)
 
+def propagate_dia(phi_x, p_prop, v_prop_1, v_prop_2, A, A_inv, Nx):
+    phi_trans_v = np.zeros_like(phi_x)
+    phi_trans_t = np.zeros_like(phi_x)
+    phi_ad = np.zeros_like(phi_x)
+    phi_dia = np.zeros_like(phi_x)
+    
+    # Transformation to diabatic states
+    phi_ad = np.einsum('ijk, ik -> jk', A, phi_x)
+       
+    # Propagating with potential operatior
+    phi_trans_v[0,:] = v_prop_1*phi_ad[0,:]
+    phi_trans_v[1,:] = v_prop_2*phi_ad[1,:]
+    
+    phi_dia = np.einsum('ijk, ik -> jk', A_inv, phi_trans_v)
+    
+    # Propagating with kinetic operatior
+    phi_trans_t[0,:] = np.fft.ifft(p_prop*np.fft.fft(phi_dia[0,:]))
+    phi_trans_t[1,:] = np.fft.ifft(p_prop*np.fft.fft(phi_dia[1,:]))
+    
+    # Transformation back to adiabatic states
+    return phi_trans_t
+
 def reflection(phi_x, Nx, dx):
     n_x = np.abs(phi_x)**2
     return np.sum(n_x[0:int(Nx/2)-1])*dx
@@ -71,8 +93,8 @@ m_h = 1/m_prim_u                    # Mass of our hydrogen atom
 
 # position space
 dx      = 0.01
-x_start = -80.0
-x_stop  = 80.0
+x_start = -250.0
+x_stop  = 250.0
 x = np.arange(x_start, x_stop, dx)
 Nx = len(x)
 
@@ -83,7 +105,7 @@ p         = np.arange(-p_nyquist, p_nyquist, dp)   # Generating momentum "freq"
 p         = np.fft.fftshift(p)
 
 # time propagation
-T = 300
+T = 2000
 dt = 0.1
 Nt = int(T/dt)
 
@@ -97,6 +119,10 @@ d = 0.7
 # adiabatic potentials
 V_a = V11_adiabatic(x, a, b, c, d, lim)     # V_a ground potental.
 V_b = V22_adiabatic(x, a, b, c, d, lim)     # V_b excited potential.
+
+# define propagators
+V_prop_1 = np.exp(-1j*V_a*dt/hbar_prim)
+V_prop_2 = np.exp(-1j*V_b*dt/hbar_prim)
 
 # diabatic potentials
 V_11 = V11(x, a, b)
@@ -124,14 +150,10 @@ for i in range(len(x)):
 
 print(np.allclose(V_ad, V_ad_check, atol=1e-15))
 
-# define propagators
-V_prop_1 =  np.exp(-1j*V_a*dt/hbar_prim)
-V_prop_2 =  np.exp(-1j*V_b*dt/hbar_prim)
-
 P_prop = np.exp(-1j*p**2*dt/(hbar_prim*2*m_h))
 
 # initial values for wavefunction
-E_i = 0.6*a                                     # initial energy
+E_i = 2*a                                     # initial energy
 width = hbar_prim/(4*np.sqrt(0.1*E_i*m_h))    # Width of our hydrogen atom
 
 p0 = np.sqrt(2*m_h*E_i)     # Initial momentum of our hydrogen atom
@@ -149,7 +171,7 @@ R_2 = reflection(phi_x[1,:], Nx, dx)
 prob_0 = T_1 + T_2 + R_1 + R_2
 print(prob_0)
 
-x_stop_R1 = np.argmax(x > -200)
+x_stop_R1 = np.argmax(x > -240)
 V_check_index = np.argmax(V_b > 1e-8)
 wave_packet_check = 1e-10
 
@@ -159,7 +181,7 @@ for t in range(Nt):
         print(f'Timestep {t} \ {Nt}') 
         if (np.abs(phi_x[0,x_stop_R1])**2 > wave_packet_check):
             break
-    phi_x = propagate(phi_x, P_prop, V_prop_1, V_prop_2, A, A_inv, Nx)
+    phi_x = propagate_dia(phi_x, P_prop, V_prop_1, V_prop_2, A, A_inv, Nx)
     
     
 T_1 = transmission(phi_x[0,:], Nx, dx)
