@@ -34,7 +34,7 @@ def x_width_anal(t, d, m, hbar_prim):
     time_factor = np.sqrt(1 + hbar_prim**2*t**2/(m**2*d**4))
     return prefactor*time_factor
 
-def p_width_anal(d, hbar_prim):
+def p_width_anal(t, d, hbar_prim, m):
     return hbar_prim/(np.sqrt(2)*d)
 
 #%% Generate initial wave packet
@@ -97,7 +97,7 @@ for t in range(Nt):
     
     ## Finding the position width from FWHM and analytcally
     width_p[t] = std_from_FWHM(n_p, dp)
-    width_p_anal[t] = p_width_anal(d, hbar_prim)
+    width_p_anal[t] = p_width_anal(t, d, hbar_prim, m_h)#p_width_anal(d, hbar_prim)
     
     ## Save n_x for plotting
     if t*dt  in save_every:
@@ -128,7 +128,7 @@ ax.set_ylabel(r'$x$ [$Å$], $k$ [$Å^{-1}$]', fontsize='16')
 ax.grid()
 ax.legend(fontsize='16', loc='upper left')
 
-plt.savefig('../T2/evolution_of_width.pdf', format='pdf', bbox_inches='tight'
+plt.savefig('../T2/evolution_of_width.pdf', format='pdf', bbox_inches='tight')
 plt.show()
 
 #%%

@@ -111,7 +111,7 @@ Nt = int(T/dt)
 lim = 1e-100
 a = 0.3
 b = 0.4
-c = 0.05
+c = 0.1
 d = 0.7 
 
 # adiabatic potentials

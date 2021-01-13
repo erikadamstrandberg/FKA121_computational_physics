@@ -9,7 +9,7 @@ hbar_prim = 0.6582845299625468
 
 #%% Plotting the Gaussian wave packet
 
-def wave_package_position(x, x0, p0, d, hbar_prim):    
+def wave_package(x, x0, p0, d, hbar_prim):    
     prefactor = np.sqrt(np.sqrt(np.pi)*d)
     envelope  = np.exp(-(x - x0)**2/(2*d**2))
     plane_wave = np.exp(1j*p0*(x - x0)/hbar_prim)

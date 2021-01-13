@@ -45,6 +45,9 @@ ax.grid()
 ax.set_xlim([-200,200])
 ax.legend(fontsize='16', loc='upper right')
 
+plt.savefig('../T3/after_E_008_alpha_05.pdf', format='pdf', bbox_inches='tight')
+plt.show()
+
 #%%
     
 x = np.loadtxt('../T3/data/x_e0_0.10_V0_0.10.csv', delimiter=',')
@@ -74,6 +77,9 @@ ax.grid()
 ax.set_xlim([-200,200])
 ax.legend(fontsize='16', loc='upper right')
 
+plt.savefig('../T3/after_E_01_alpha_05.pdf', format='pdf', bbox_inches='tight')
+plt.show()
+
 #%%
     
 x = np.loadtxt('../T3/data/x_e0_0.12_V0_0.10.csv', delimiter=',')
@@ -100,6 +106,9 @@ ax.set_ylabel(r'$|\psi(x)|^2$ [$Å^{-1}$], $V(x)$ [eV]', fontsize='16')
 ax.grid()
 ax.set_xlim([-200,200])
 ax.legend(fontsize='16', loc='upper right')
+
+plt.savefig('../T3/after_E_012_alpha_05.pdf', format='pdf', bbox_inches='tight')
+plt.show()
 
 #%%
     
@@ -128,7 +137,8 @@ ax.grid()
 ax.set_xlim([-120,120])
 ax.legend(fontsize='16', loc='upper right')
 
-
+plt.savefig('../T3/after_E_008_alpha_2.pdf', format='pdf', bbox_inches='tight')
+plt.show()
 
 #%%
     
@@ -157,6 +167,9 @@ ax.grid()
 ax.set_xlim([-120,120])
 ax.legend(fontsize='16', loc='upper right')
 
+plt.savefig('../T3/after_E_01_alpha_2.pdf', format='pdf', bbox_inches='tight')
+plt.show()
+
 
 #%%
     
@@ -184,5 +197,8 @@ ax.set_ylabel(r'$|\psi(x)|^2$ [$Å^{-1}$], $V(x)$ [eV]', fontsize='16')
 ax.grid()
 ax.set_xlim([-120,120])
 ax.legend(fontsize='16', loc='upper right')
+
+plt.savefig('../T3/after_E_012_alpha_2.pdf', format='pdf', bbox_inches='tight')
+plt.show()
 
 

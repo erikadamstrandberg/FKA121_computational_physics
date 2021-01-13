@@ -76,7 +76,7 @@ ax.set_xlabel(r'$k$ [$Å^{-1}$]', fontsize='16')
 ax.set_ylabel(r'$|\psi(k)|^2$ [$Å$]', fontsize='16')
 
 ax.grid()
-ax.legend(fontsize='16', loc='upper right')
+ax.legend(fontsize='13', loc='upper right')
 
 ax.set_xlim([0,14])
 ax.set_ylim([y_min,y_max])
