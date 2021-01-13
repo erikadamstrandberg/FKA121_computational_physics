@@ -71,6 +71,7 @@ ax[0].set_xlabel(r'x [Å]', fontsize=axis_fs)
 ax[0].set_ylabel(r'Energy [eV]', fontsize=axis_fs)
 ax[0].set_title(r'Diabatic potential energy', fontsize=title_fs)
 ax[0].legend(fontsize=legend_fs)
+ax[0].grid()
 
 ax[1].plot(x, V_11_ad_1, '--', color=v11_color, label=r'$V_{11}^{ad}$, $c = 0.05$')
 ax[1].plot(x, V_11_ad_2, color=v11_color, label=r'$V_{11}^{ad}$, $c = 0.1$')
@@ -81,5 +82,8 @@ ax[1].set_xlabel(r'x [Å]', fontsize=axis_fs)
 ax[1].set_ylabel(r'Energy [eV]', fontsize=axis_fs)
 ax[1].set_title(r'Adiabatic potential energy', fontsize=title_fs)
 ax[1].legend(fontsize=legend_fs)
+ax[1].grid()
+
+#plt.savefig('potentials.pdf', format='pdf', bbox_inches='tight')
 
 plt.show()
